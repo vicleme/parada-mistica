@@ -2,6 +2,8 @@
 
 🌐 [English](README.md)
 
+🔗 **No ar:** [paradamistica.netlify.app](https://paradamistica.netlify.app/)
+
 Site institucional que reúne três ferramentas de autoconhecimento — **Tiragem de Cartas**, **Cálculo de Efemérides** e **Sinastria** — sob uma marca e portal comum.
 
 Site 100% estático: HTML, CSS e JavaScript puro, sem framework e sem passo de build.
@@ -59,6 +61,8 @@ Depois acesse `http://localhost:8000`.
 ## Deploy
 
 O repositório já inclui um `netlify.toml` configurado para site estático (sem comando de build, publicando a raiz do projeto). Conecte o repositório no painel do Netlify e todo push na branch principal publica automaticamente.
+
+Atualmente publicado em [paradamistica.netlify.app](https://paradamistica.netlify.app/).
 
 ## Notas
 

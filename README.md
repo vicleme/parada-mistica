@@ -2,6 +2,8 @@
 
 🌐 [Português (BR)](README.pt-br.md)
 
+🔗 **Live:** [paradamistica.netlify.app](https://paradamistica.netlify.app/)
+
 Institutional site that brings together three self-knowledge tools — **Card Readings**, **Ephemeris Calculator**, and **Synastry** — under a single brand and portal.
 
 100% static site: plain HTML, CSS, and JavaScript. No framework, no build step.
@@ -59,6 +61,8 @@ Then visit `http://localhost:8000`.
 ## Deployment
 
 The repository includes a `netlify.toml` already configured for a static site (no build command, publishing the project root). Connect the repo in Netlify's dashboard and every push to the main branch deploys automatically.
+
+Currently deployed at [paradamistica.netlify.app](https://paradamistica.netlify.app/).
 
 ## Notes
 
