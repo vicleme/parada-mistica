@@ -50,8 +50,9 @@
                 <a href="#" class="pm-nav-dropdown-trigger ativo">Serviços ▾</a>
                 <div class="pm-nav-dropdown-menu">
                     <a href="tiragem-cartas.html">Tiragem de Cartas</a>
-                    <a href="efemerides.html">Cálculo de Efemérides</a>
+                    <a href="mapas.html">Mapas Astrais</a>
                     <a href="sinastria.html" class="ativo">Sinastria</a>
+                    <a href="efemerides.html">Efemérides</a>
                 </div>
             </div>
             <a href="#" title="Página ainda não publicada">Blog</a>
@@ -94,17 +95,8 @@
   <div class="tab-view active" id="calcTab">
 
   <div class="panel">
-    <h2>1. Nomes</h2>
-    <p class="hint">Preenchidos automaticamente se o texto tiver a linha "Sinastria entre X e Y" — ou edite à mão.</p>
+    <h2>1. Tipo de vínculo</h2>
     <div class="row">
-      <div class="field">
-        <label>Pessoa 1</label>
-        <input type="text" id="name1" placeholder="Ex: Victor">
-      </div>
-      <div class="field">
-        <label>Pessoa 2</label>
-        <input type="text" id="name2" placeholder="Ex: Dalton">
-      </div>
       <div class="field">
         <label>Tipo de vínculo</label>
         <select id="relType" class="field-select">
@@ -116,14 +108,58 @@
     </div>
   </div>
 
-  <div class="panel">
-    <h2>2. Cole os dados da sinastria</h2>
+  <div class="source-toggle" id="sourceToggle">
+    <button type="button" class="source-toggle-btn active" id="sourceToggleCadastro" data-source="cadastro">Usar pessoas cadastradas</button>
+    <button type="button" class="source-toggle-btn" id="sourceToggleColar" data-source="colar">Colar texto manualmente</button>
+  </div>
+
+  <div class="panel" id="colarTextoPanel" style="display:none">
+    <h2>2. Nomes e dados da sinastria</h2>
+    <p class="hint">Preenchidos automaticamente se você usar pessoas cadastradas — ou preencha à mão ao colar o texto.</p>
+    <div class="row">
+      <div class="field">
+        <label>Pessoa 1</label>
+        <input type="text" id="name1" placeholder="Ex: Victor">
+      </div>
+      <div class="field">
+        <label>Pessoa 2</label>
+        <input type="text" id="name2" placeholder="Ex: Dalton">
+      </div>
+    </div>
     <p class="hint">Pode colar o arquivo inteiro (mapas individuais + seção de sinastria + casas) — a calculadora ignora o que não reconhece.</p>
     <textarea id="raw" placeholder="Cole aqui o texto completo, incluindo as linhas do tipo:&#10;VL's Sun in Pisces Trine DD's Sun in Cancer (Orb: 4°31')&#10;DD's Sun in the 7th VL's house"></textarea>
     <div class="error" id="errorMsg"></div>
     <div class="edit-banner" id="editBanner"></div>
     <br>
     <button id="calcBtn">Calcular sinastria</button>
+  </div>
+
+  <div class="panel" id="pessoasCadastradasPanel">
+    <h2>2. Usar pessoas cadastradas</h2>
+    <p class="hint">Escolha duas pessoas já cadastradas (em Mapas Astrais) para calcular a sinastria direto, sem colar texto.</p>
+    <div class="row">
+      <div class="field">
+        <label>Pessoa 1</label>
+        <select id="pessoaSelectA" class="field-select"></select>
+      </div>
+      <div class="field" style="max-width:120px;">
+        <label>Sigla 1</label>
+        <input type="text" id="pessoaSiglaA" class="field-select" maxlength="6" style="text-transform:uppercase;" placeholder="ex: VL">
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Pessoa 2</label>
+        <select id="pessoaSelectB" class="field-select"></select>
+      </div>
+      <div class="field" style="max-width:120px;">
+        <label>Sigla 2</label>
+        <input type="text" id="pessoaSiglaB" class="field-select" maxlength="6" style="text-transform:uppercase;" placeholder="ex: DD">
+      </div>
+    </div>
+    <p class="hint">A sigla é o identificador usado no texto gerado (ex: "VL's Sun...") — vem preenchida da pessoa cadastrada, mas pode editar aqui antes de calcular. Sem sigla, usa o nome.</p>
+    <button type="button" id="calcFromPessoasBtn" class="pm-pessoa-btn primary" style="margin-top:4px;">Calcular sinastria com estes dados</button>
+    <div class="hint" id="pessoasCadastradasMsg" style="margin-top:8px;"></div>
   </div>
 
   <div class="edit-banner" id="viewBanner" style="display:none;"></div>
@@ -475,8 +511,9 @@
         <div class="pm-footer-col">
             <h5>Serviços</h5>
             <a href="tiragem-cartas.html">Tiragem de Cartas</a>
-            <a href="efemerides.html">Cálculo de Efemérides</a>
+            <a href="mapas.html">Mapas Astrais</a>
             <a href="#" class="ativo" title="Você está aqui">Sinastria</a>
+            <a href="efemerides.html">Cálculo de Efemérides</a>
         </div>
         <div class="pm-footer-col">
             <h5>Legal</h5>

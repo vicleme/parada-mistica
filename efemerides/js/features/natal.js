@@ -15,6 +15,9 @@ import { TRANSIT_BODIES, PLANET_GLYPH, PLANET_LABEL, SIGN_GLYPH, SIGNS } from '.
 
 export function collectNatalInput(){
   return {
+    nome: document.getElementById('natalName').value || null,
+    sigla: document.getElementById('natalSigla').value || null,
+    cidade: document.getElementById('citySearch').value || null,
     data_nascimento: document.getElementById('natalDate').value || null,
     hora_nascimento: document.getElementById('natalTime').value || null,
     fuso_horario: document.getElementById('natalTz').value !== '' ? parseFloat(document.getElementById('natalTz').value) : null,
@@ -60,6 +63,9 @@ export function toggleImportBox(){
   box.style.display = (box.style.display==='none' || !box.style.display) ? 'block' : 'none';
 }
 export function applyNatalInput(data){
+  if(data.nome) document.getElementById('natalName').value = data.nome;
+  if(data.sigla) document.getElementById('natalSigla').value = data.sigla;
+  document.getElementById('citySearch').value = data.cidade || '';
   if(data.data_nascimento) document.getElementById('natalDate').value = data.data_nascimento;
   if(data.hora_nascimento) document.getElementById('natalTime').value = data.hora_nascimento;
   if(data.fuso_horario!==null && data.fuso_horario!==undefined) document.getElementById('natalTz').value = data.fuso_horario;
@@ -180,6 +186,7 @@ export function pickCity(idx){
   if(!d) return;
   document.getElementById('natalLat').value = parseFloat(d.lat).toFixed(4);
   document.getElementById('natalLon').value = parseFloat(d.lon).toFixed(4);
+  document.getElementById('citySearch').value = d.display_name;
   document.getElementById('cityResults').innerHTML = '<div class="hint" style="padding:6px 2px;">Selecionado: '+d.display_name+'. Confirme o fuso horário no campo abaixo (atenção ao horário de verão vigente na data, se houver).</div>';
 }
 

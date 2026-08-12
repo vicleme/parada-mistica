@@ -60,7 +60,7 @@ export function updateComparison(id, data){
 }
 
 export function removeComparison(id){
-  comparisons = comparisons.filter(c => c.id !== id);
+  setComparisons(comparisons.filter(c => c.id !== id));
   saveComparisons();
   renderComparisons();
   refreshDictSynastryOptions();
@@ -75,6 +75,12 @@ export function startEdit(id){
   const viewBannerEl = document.getElementById('viewBanner');
   viewBannerEl.style.display = 'none';
   viewBannerEl.innerHTML = '';
+
+  // Os campos de edição (name1/name2/raw/calcBtn) vivem dentro do painel
+  // "Colar texto manualmente" — precisa trocar pra essa fonte pra revelá-los,
+  // já que "Usar pessoas cadastradas" é o painel padrão agora.
+  const sourceToggleColarBtn = document.getElementById('sourceToggleColar');
+  if (!sourceToggleColarBtn.classList.contains('active')) sourceToggleColarBtn.click();
 
   document.getElementById('name1').value = c.n1;
   document.getElementById('name2').value = c.n2;

@@ -13,10 +13,27 @@ import { TRANSIT_BODIES, PLANET_GLYPH, PLANET_LABEL, SIGN_GLYPH, PLANET_GROUPS }
 import { impactBar } from '../ui/render-helpers.js';
 import { downloadBlob } from '../shared/download.js';
 import { toDateInputValue, readDateParts } from './natal.js';
-import { synChartA, synChartB, synPointList, synPointLon } from './synastry.js';
+import { synChartA, synChartB, synPointList, synPointLon, loadSynChartsFromStorageOnly } from './synastry.js';
 import { planetMatchesFilter, phaseTag } from './transits.js';
 
 export let doubleTransitData = null; // {mode, rows}
+
+// ---------- inicialização (efemerides.html não tem formulário de Pessoa A/B
+// próprio — os dados vêm do que já foi calculado em Mapas Astrais > Sinastria,
+// salvo no localStorage) ----------
+export function dtInitFromStorage(){
+  const summaryEl = document.getElementById('dtPeopleSummary');
+  const calcBtn = document.getElementById('dtCalcBtn');
+  const result = loadSynChartsFromStorageOnly();
+  if(!summaryEl) return;
+  if(!result.ok){
+    summaryEl.innerHTML = '<div class="hint">Calcule os mapas de Pessoa A e Pessoa B na aba Sinastria de <a href="mapas.html#sinastria">Mapas Astrais</a> primeiro.</div>';
+    if(calcBtn) calcBtn.disabled = true;
+    return;
+  }
+  summaryEl.innerHTML = '<div class="hint">Pessoa A: <strong>'+result.nomeA+'</strong> ('+result.dataA+') · Pessoa B: <strong>'+result.nomeB+'</strong> ('+result.dataB+') — <a href="mapas.html#sinastria">recalcular em Mapas Astrais ↗</a></div>';
+  if(calcBtn) calcBtn.disabled = false;
+}
 
 export function dtSetMode(m){
   document.getElementById('dtModeSingleBtn').classList.toggle('active', m==='single');
@@ -76,7 +93,7 @@ export function dtUpdateRangeWarn(){
 }
 
 export function calcDoubleTransits(){
-  if(!synChartA || !synChartB){ dtSetStatus('Calcule o mapa de A e o mapa de B primeiro.', true); return; }
+  if(!synChartA || !synChartB){ dtSetStatus('Calcule o mapa de A e o mapa de B na aba Sinastria de Mapas Astrais primeiro.', true); return; }
   const isSingle = document.getElementById('dtModeSingleBtn').classList.contains('active');
   if(isSingle){
     dtSetStatus('Calculando...', false);

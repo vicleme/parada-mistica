@@ -13,6 +13,8 @@ import { classify, computeScores } from './compute.js';
 import { CALIBRATION } from './calibration.js';
 import { detectSiglasFromParsed, getPromptConfig, importDictionaryFromJSON, refreshDictSynastryOptions, renderDictionaryForCurrentSelection, renderPromptConfigPanel, renderPromptConfigPreview, setPromptConfigField } from './dictionary.js';
 import { parseText } from './parser.js';
+import { buildSinastriaTextFromPessoas } from './from-pessoas.js';
+import { attachPessoaSelect, injectStyles as injectPessoaPickerStyles } from '../../assets/js/pessoa-picker.js';
 import { buildReportCategoryComparativeHTML, buildReportComparativeHTML, buildReportRelationHTML, getReportOptions, getSelectedReportSynastries } from './report.js';
 import { compatExplainerParts } from './scoring.js';
 import { comparisons, currentDictFilter, currentDictSynastryId, dictionary, editingId, promptConfigs, saveComparisons, saveDictionary, savePromptConfigs, setComparisons, setCurrentDictFilter, setCurrentDictSynastryId, setDictionary } from './state.js';
@@ -162,7 +164,7 @@ document.getElementById('importDictInput').addEventListener('change', (e) => {
   e.target.value = '';
 });
 
-document.getElementById('calcBtn').addEventListener('click', () => {
+function runSynastryCalculation(){
   const viewBannerEl = document.getElementById('viewBanner');
   viewBannerEl.style.display = 'none';
   viewBannerEl.innerHTML = '';
@@ -346,6 +348,105 @@ document.getElementById('calcBtn').addEventListener('click', () => {
 
   setCurrentDictSynastryId(synastryId);
   refreshDictSynastryOptions();
+}
+
+document.getElementById('calcBtn').addEventListener('click', runSynastryCalculation);
+
+// ---------- Importação vinda da Efemérides (botão "Abrir na Sinastria com estes dados") ----------
+// A aba Sinastria da página de Efemérides já calcula os mapas e monta o texto de
+// aspectos; em vez de duplicar esse motor aqui, só lemos o que ela deixou em
+// localStorage (chave 'synastry:pendingImport'), preenchemos o textarea de colagem
+// e dos nomes, e disparamos o mesmo cálculo que rodaria se a pessoa tivesse colado
+// o texto manualmente. Consumido uma vez só (removido do storage logo em seguida)
+// pra não reaplicar em toda visita futura.
+(function importPendingSynastryFromEfemerides(){
+  let pending;
+  try {
+    const stored = localStorage.getItem('synastry:pendingImport');
+    if (!stored) return;
+    pending = JSON.parse(stored);
+  } catch (e) {
+    return;
+  }
+  localStorage.removeItem('synastry:pendingImport');
+  if (!pending || !pending.text) return;
+
+  document.getElementById('raw').value = pending.text;
+  autoGrowTextarea(document.getElementById('raw'));
+  if (pending.name1) document.getElementById('name1').value = pending.name1;
+  if (pending.name2) document.getElementById('name2').value = pending.name2;
+
+  const viewBannerEl = document.getElementById('viewBanner');
+  viewBannerEl.textContent = '↳ Dados recebidos da Efemérides — cálculo rodado automaticamente. Você pode editar o texto acima e recalcular a qualquer momento.';
+  viewBannerEl.style.display = 'block';
+
+  runSynastryCalculation();
+})();
+
+// ---------- Toggle "Colar texto manualmente" / "Usar pessoas cadastradas" ----------
+// Alterna qual painel de origem dos dados fica visível. A classe .active nos
+// botões e o display dos dois painéis ficam sempre em sincronia com a fonte
+// atual, chamada de setSource() tanto pelo clique nos botões quanto depois de
+// calcular a partir do cadastro (pra revelar o texto já preenchido).
+const sourceToggleColarBtn = document.getElementById('sourceToggleColar');
+const sourceToggleCadastroBtn = document.getElementById('sourceToggleCadastro');
+const colarTextoPanelEl = document.getElementById('colarTextoPanel');
+const pessoasCadastradasPanelEl = document.getElementById('pessoasCadastradasPanel');
+
+function setSource(source) {
+  const isColar = source === 'colar';
+  sourceToggleColarBtn.classList.toggle('active', isColar);
+  sourceToggleCadastroBtn.classList.toggle('active', !isColar);
+  colarTextoPanelEl.style.display = isColar ? '' : 'none';
+  pessoasCadastradasPanelEl.style.display = isColar ? 'none' : '';
+}
+
+sourceToggleColarBtn.addEventListener('click', () => setSource('colar'));
+sourceToggleCadastroBtn.addEventListener('click', () => setSource('cadastro'));
+
+// ---------- Painel "Usar pessoas cadastradas" ----------
+// Alternativa à colagem manual: escolhendo duas pessoas do cadastro (o mesmo
+// cadastro usado em Mapas Astrais), calcula os dois mapas na hora, monta o
+// mesmo texto-ponte que mapas.html gera hoje e roda pelo mesmíssimo
+// parseText/pontuação de sempre — nada da lógica de cálculo se duplica, só o
+// motor de efemerides passa a ser importado também aqui (ver from-pessoas.js).
+// A colagem manual continua funcionando lado a lado, sem nenhuma mudança.
+injectPessoaPickerStyles();
+let _pessoaSelA = null, _pessoaSelB = null;
+const pessoaSelectAEl = document.getElementById('pessoaSelectA');
+const pessoaSelectBEl = document.getElementById('pessoaSelectB');
+const pessoaSiglaAEl = document.getElementById('pessoaSiglaA');
+const pessoaSiglaBEl = document.getElementById('pessoaSiglaB');
+attachPessoaSelect(pessoaSelectAEl, { onSelect: (p) => { _pessoaSelA = p; pessoaSiglaAEl.value = p.sigla || ''; } });
+attachPessoaSelect(pessoaSelectBEl, { onSelect: (p) => { _pessoaSelB = p; pessoaSiglaBEl.value = p.sigla || ''; } });
+
+document.getElementById('calcFromPessoasBtn').addEventListener('click', () => {
+  const msgEl = document.getElementById('pessoasCadastradasMsg');
+  msgEl.style.color = '';
+  if (!_pessoaSelA || !_pessoaSelB){ msgEl.textContent = 'Escolha as duas pessoas primeiro.'; msgEl.style.color = 'var(--rose)'; return; }
+  if (_pessoaSelA.id === _pessoaSelB.id){ msgEl.textContent = 'Escolha duas pessoas diferentes.'; msgEl.style.color = 'var(--rose)'; return; }
+
+  // Sigla do campo (se preenchida) prevalece sobre a sigla salva no cadastro —
+  // passamos uma cópia da pessoa com a sigla sobrescrita pra não mexer no
+  // registro original nem em from-pessoas.js.
+  const siglaAOverride = pessoaSiglaAEl.value.trim();
+  const siglaBOverride = pessoaSiglaBEl.value.trim();
+  const pessoaAForCalc = siglaAOverride ? { ..._pessoaSelA, sigla: siglaAOverride } : _pessoaSelA;
+  const pessoaBForCalc = siglaBOverride ? { ..._pessoaSelB, sigla: siglaBOverride } : _pessoaSelB;
+
+  const built = buildSinastriaTextFromPessoas(pessoaAForCalc, pessoaBForCalc);
+  if (!built){ msgEl.textContent = 'Faltam dados de nascimento em alguma das duas pessoas.'; msgEl.style.color = 'var(--rose)'; return; }
+
+  document.getElementById('raw').value = built.text;
+  autoGrowTextarea(document.getElementById('raw'));
+  document.getElementById('name1').value = built.nameA;
+  document.getElementById('name2').value = built.nameB;
+
+  const warn = built.warningA || built.warningB;
+  msgEl.textContent = warn ? warn : 'Calculado a partir do cadastro. Você pode editar o texto abaixo e recalcular quando quiser.';
+
+  runSynastryCalculation();
+  setSource('colar');
 });
 
 // ---------- Aba de Relatório ----------

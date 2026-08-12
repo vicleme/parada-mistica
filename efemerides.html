@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cálculo de Efemérides - Parada Mística</title>
+<title>Efemérides - Parada Mística</title>
 <link rel="icon" href="assets/logo.png">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="efemerides/css/styles.css">
-<meta name="description" content="Calcule trânsitos, sinastria e mapa composto com precisão. Descubra como os astros se movem sobre o seu mapa natal.">
+<meta name="description" content="Calcule trânsitos individuais e trânsitos duplos com precisão. Descubra como os astros se movem sobre o seu mapa natal ou sobre uma relação.">
 
 <!-- Open Graph / Facebook, WhatsApp, etc. -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://paradamistica.netlify.app/efemerides.html">
-<meta property="og:title" content="Cálculo de Efemérides - Parada Mística">
-<meta property="og:description" content="Calcule trânsitos, sinastria e mapa composto com precisão. Descubra como os astros se movem sobre o seu mapa natal.">
+<meta property="og:title" content="Efemérides - Parada Mística">
+<meta property="og:description" content="Calcule trânsitos individuais e trânsitos duplos com precisão. Descubra como os astros se movem sobre o seu mapa natal ou sobre uma relação.">
 <meta property="og:image" content="https://paradamistica.netlify.app/assets/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -22,8 +22,8 @@
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:url" content="https://paradamistica.netlify.app/efemerides.html">
-<meta name="twitter:title" content="Cálculo de Efemérides - Parada Mística">
-<meta name="twitter:description" content="Calcule trânsitos, sinastria e mapa composto com precisão. Descubra como os astros se movem sobre o seu mapa natal.">
+<meta name="twitter:title" content="Efemérides - Parada Mística">
+<meta name="twitter:description" content="Calcule trânsitos individuais e trânsitos duplos com precisão. Descubra como os astros se movem sobre o seu mapa natal ou sobre uma relação.">
 <meta name="twitter:image" content="https://paradamistica.netlify.app/assets/og-image.jpg">
 <script>
     // Aplica tema antes do render para evitar flash
@@ -50,8 +50,9 @@
                 <a href="#" class="pm-nav-dropdown-trigger ativo">Serviços ▾</a>
                 <div class="pm-nav-dropdown-menu">
                     <a href="tiragem-cartas.html">Tiragem de Cartas</a>
-                    <a href="efemerides.html" class="ativo">Cálculo de Efemérides</a>
+                    <a href="mapas.html">Mapas Astrais</a>
                     <a href="sinastria.html">Sinastria</a>
+                    <a href="efemerides.html" class="ativo">Efemérides</a>
                 </div>
             </div>
             <a href="#" title="Página ainda não publicada">Blog</a>
@@ -70,10 +71,10 @@
 
 <section class="efem-hero-section">
   <div class="efem-hero">
-    <span class="pm-breadcrumb">Serviços &gt; <b>Cálculo de Efemérides</b></span>
-    <h1>Efeméride Pessoal <span class="efem-hero-spark">✦</span></h1>
-    <div class="subtitle">Cálculos astrológicos precisos baseados no seu mapa natal. Obtenha trânsitos, posições planetárias e aspectos atualizados para qualquer data e hora.</div>
-    <div class="eyebrow">Sistema pessoal de efemérides · não substitui interpretação profissional</div>
+    <span class="pm-breadcrumb">Serviços &gt; <b>Efemérides</b></span>
+    <h1>Efemérides <span class="efem-hero-spark">✦</span></h1>
+    <div class="subtitle">Veja como os astros de agora (ou de qualquer data) se movem sobre o seu mapa natal ou sobre uma relação — trânsitos individuais e trânsitos duplos.</div>
+    <div class="eyebrow">Sistema pessoal de trânsitos · não substitui interpretação profissional</div>
   </div>
 </section>
 
@@ -81,8 +82,8 @@
 
 <div class="tabs">
   <div class="tab active" id="tabTransitos" onclick="setView('transitos')">Trânsitos individuais</div>
-  <div class="tab" id="tabSinastria" onclick="setView('sinastria')">Sinastria</div>
-  <div class="tab" id="tabComposto" onclick="setView('composto')">Composto</div>
+  <div class="tab" id="tabDuplos" onclick="setView('duplos')">Trânsitos duplos</div>
+  <div class="tab" id="tabComposto" onclick="setView('composto')">Sobre o composto</div>
 </div>
 
 <div id="viewTransitos">
@@ -104,11 +105,11 @@
   <h2>1. Mapa natal (referência)</h2>
   <div class="row3">
     <div>
-      <label>Data de nascimento</label>
+      <label>Nascimento</label>
       <input type="date" id="natalDate">
     </div>
     <div>
-      <label>Hora (opcional)</label>
+      <label>Hora</label>
       <input type="time" id="natalTime">
       <div class="hint">Sem hora → assume 12:00 e desativa Ascendente/Casas.</div>
     </div>
@@ -183,7 +184,7 @@
   <div id="singleFields">
     <div class="row3">
       <div><label>Data</label><input type="date" id="singleDate"></div>
-      <div><label>Hora (opcional)</label><input type="time" id="singleTime"><div class="hint">Padrão: 12:00</div></div>
+      <div><label>Hora</label><input type="time" id="singleTime"><div class="hint">Padrão: 12:00</div></div>
       <div><label>Fuso (UTC)</label><input type="number" id="singleTz" step="0.5" placeholder="ex: -3"></div>
     </div>
     <button class="btn secondary small" style="margin-top:10px;" onclick="fillNow()">Preencher com agora</button>
@@ -296,202 +297,13 @@
 <!-- ===================== fim viewTransitos ===================== -->
 
 <!-- ===================== SINASTRIA ===================== -->
-<div id="viewSinastria" style="display:none">
-
-<div class="note">
-  <strong>Sinastria</strong> compara dois mapas natais ponto a ponto: os aspectos entre os planetas de uma pessoa e os da outra, e em que casa os planetas de uma caem no mapa da outra. É uma técnica diferente do <strong>mapa composto</strong> (ponto médio entre os dois mapas, que trata a relação como uma entidade própria, com identidade e ciclo de vida próprios) — aqui o foco é a interação entre os dois mapas tal como são.
-</div>
-
-<div class="grid2">
-  <div class="panel">
-    <h2>Pessoa A</h2>
-    <div class="row" style="grid-template-columns:2fr 1fr;">
-      <div>
-        <label>Nome (opcional)</label>
-        <input type="text" id="synAName" placeholder="ex: Você">
-      </div>
-      <div>
-        <label>Sigla</label>
-        <input type="text" id="synASigla" placeholder="ex: VL" maxlength="6" style="text-transform:uppercase;">
-      </div>
-    </div>
-    <div class="hint" style="margin:-6px 0 10px;"><br>A sigla é o identificador usado no texto pra Calculadora de Sinastria (ex: "VL's Sun..."). Se ficar em branco, usa o Nome.</div>
-    <div class="row3">
-      <div>
-        <label>Data de nascimento</label>
-        <input type="date" id="synADate">
-      </div>
-      <div>
-        <label>Hora (opcional)</label>
-        <input type="time" id="synATime">
-        <div class="hint">Sem hora → assume 12:00 e desativa Ascendente/Casas.</div>
-      </div>
-      <div>
-        <label>Fuso horário (UTC)</label>
-        <input type="number" id="synATz" step="0.5" placeholder="ex: -3">
-      </div>
-    </div>
-    <label>Buscar cidade (preenche latitude/longitude automaticamente)</label>
-    <div class="row" style="grid-template-columns:1fr auto;">
-      <input type="text" id="synACitySearch" placeholder="ex: Santos, SP, Brasil" onkeydown="if(event.key==='Enter'){event.preventDefault();searchCityFor('synACitySearch','synACityResults','synALat','synALon','synA');}">
-      <button class="btn small" style="margin-top:0;" onclick="searchCityFor('synACitySearch','synACityResults','synALat','synALon','synA')">Buscar</button>
-    </div>
-    <div id="synACityResults"></div>
-    <div class="row">
-      <div>
-        <label>Latitude (decimal, + Norte / − Sul)</label>
-        <input type="number" id="synALat" step="0.0001">
-      </div>
-      <div>
-        <label>Longitude (decimal, + Leste / − Oeste)</label>
-        <input type="number" id="synALon" step="0.0001">
-      </div>
-    </div>
-    <label>Sistema de casas</label>
-    <select id="synAHouse">
-      <option value="whole">Signos Inteiros</option>
-      <option value="equal">Casas Iguais</option>
-      <option value="placidus">Placidus</option>
-    </select>
-    <div class="divider"></div>
-    <button class="btn" onclick="calcSynPerson('A')">Calcular mapa de A</button>
-    <div class="hint" id="synAMsg" style="margin-top:8px;"></div>
-    <div class="divider"></div>
-    <div id="synAOutput"><div class="empty">Preencha os dados e calcule para ver o mapa aqui.</div></div>
-  </div>
-
-  <div class="panel">
-    <h2>Pessoa B</h2>
-    <div class="row" style="grid-template-columns:2fr 1fr;">
-      <div>
-        <label>Nome (opcional)</label>
-        <input type="text" id="synBName" placeholder="ex: Parceiro(a)">
-      </div>
-      <div>
-        <label>Sigla</label>
-        <input type="text" id="synBSigla" placeholder="ex: MP" maxlength="6" style="text-transform:uppercase;">
-      </div>
-    </div>
-    <div class="hint" style="margin:-6px 0 10px;"><br>A sigla é o identificador usado no texto pra Calculadora de Sinastria (ex: "MP's Moon..."). Se ficar em branco, usa o Nome.</div>
-    <div class="row3">
-      <div>
-        <label>Data de nascimento</label>
-        <input type="date" id="synBDate">
-      </div>
-      <div>
-        <label>Hora (opcional)</label>
-        <input type="time" id="synBTime">
-        <div class="hint">Sem hora → assume 12:00 e desativa Ascendente/Casas.</div>
-      </div>
-      <div>
-        <label>Fuso horário (UTC)</label>
-        <input type="number" id="synBTz" step="0.5" placeholder="ex: -3">
-      </div>
-    </div>
-    <label>Buscar cidade (preenche latitude/longitude automaticamente)</label>
-    <div class="row" style="grid-template-columns:1fr auto;">
-      <input type="text" id="synBCitySearch" placeholder="ex: Salvador, BA, Brasil" onkeydown="if(event.key==='Enter'){event.preventDefault();searchCityFor('synBCitySearch','synBCityResults','synBLat','synBLon','synB');}">
-      <button class="btn small" style="margin-top:0;" onclick="searchCityFor('synBCitySearch','synBCityResults','synBLat','synBLon','synB')">Buscar</button>
-    </div>
-    <div id="synBCityResults"></div>
-    <div class="row">
-      <div>
-        <label>Latitude (decimal, + Norte / − Sul)</label>
-        <input type="number" id="synBLat" step="0.0001">
-      </div>
-      <div>
-        <label>Longitude (decimal, + Leste / − Oeste)</label>
-        <input type="number" id="synBLon" step="0.0001">
-      </div>
-    </div>
-    <label>Sistema de casas</label>
-    <select id="synBHouse">
-      <option value="whole">Signos Inteiros</option>
-      <option value="equal">Casas Iguais</option>
-      <option value="placidus">Placidus</option>
-    </select>
-    <div class="divider"></div>
-    <button class="btn" onclick="calcSynPerson('B')">Calcular mapa de B</button>
-    <div class="hint" id="synBMsg" style="margin-top:8px;"></div>
-    <div class="divider"></div>
-    <div id="synBOutput"><div class="empty">Preencha os dados e calcule para ver o mapa aqui.</div></div>
-  </div>
-</div>
-
-<div class="panel">
-  <h2>Calcular sinastria</h2>
-  <div class="hint" style="margin-bottom:10px;">Calcule os dois mapas acima primeiro.</div>
-  <div class="toolbar" style="margin-bottom:12px;">
-    <button class="btn secondary small" onclick="exportSynInput()">Exportar dados (JSON)</button>
-    <button class="btn secondary small" onclick="toggleSynImportBox()">Importar dados (JSON)</button>
-    <button class="btn secondary small" onclick="clearSynStorage()">Esquecer dados salvos</button>
-  </div>
-  <div class="hint" style="margin-bottom:12px;">Os dados de Pessoa A e Pessoa B ficam salvos só neste navegador (localStorage) e são recarregados automaticamente na próxima visita — nada é enviado para fora.</div>
-  <div id="synImportBox" style="display:none; margin-bottom:16px;">
-    <label>Colar JSON aqui</label>
-    <textarea id="synImportJsonText" rows="4" style="width:100%; background:var(--input-bg); border:1px solid var(--line); color:var(--text); padding:9px 10px; border-radius:6px; font-family:inherit; font-size:12.5px;" placeholder='{"pessoa_a":{"nome":"...","data_nascimento":"1990-05-15", ...},"pessoa_b":{...}}'></textarea>
-    <div class="row" style="margin-top:8px; align-items:flex-end;">
-      <div>
-        <label>...ou selecione um arquivo .json</label>
-        <input type="file" id="synImportJsonFile" accept="application/json,.json">
-      </div>
-      <div>
-        <button class="btn small" onclick="importSynInput()">Carregar dados</button>
-      </div>
-    </div>
-    <div class="hint" id="synImportStatus" style="margin-top:6px;"></div>
-  </div>
-  <button class="btn" onclick="calcSynastry()">Calcular sinastria</button>
-  <div class="hint" id="synStatus" style="margin-top:8px;"></div>
-</div>
-
-<div class="panel" id="synResultsPanel" style="display:none;">
-  <h2>Aspectos entre os dois mapas (ordenados por impacto)</h2>
-  <div class="filters">
-    <div class="f">
-      <label>Ponto de A</label>
-      <select id="synFA"><option value="">Todos</option></select>
-    </div>
-    <div class="f">
-      <label>Ponto de B</label>
-      <select id="synFB"><option value="">Todos</option></select>
-    </div>
-    <div class="f">
-      <label>Tipo de aspecto</label>
-      <select id="synFAspect"><option value="">Todos</option></select>
-    </div>
-    <div class="f" style="min-width:120px; flex:0.6;">
-      <label>Impacto mínimo</label>
-      <input type="number" id="synFImpact" min="0" max="100" step="1" value="0" placeholder="0–100">
-    </div>
-    <div class="f zero-toggle">
-      <label class="chk" title="Aspectos cujo orbe passou do teto específico do tipo de astro (Quíron/Lilith/Nodo/Vértice/Fortuna/transpessoais) — considerados irrelevantes, peso zerado.">
-        <input type="checkbox" id="synShowZeroed" onchange="renderSynAspectsTable()"> Mostrar zerados
-      </label>
-    </div>
-  </div>
-  <div class="resultsbar">
-    <span class="count" id="synResultCount"></span>
-    <div class="toolbar">
-      <button class="btn secondary small" onclick="copySynForAI(this)">Copiar para IA</button>
-      <button class="btn secondary small" onclick="copyForSinastriaCalc(this)">Copiar p/ Calculadora de Sinastria</button>
-      <a href="sinastria.html" target="_blank" class="btn small btn-link-sinastria">Abrir Sinastria ↗</a>
-      <button class="btn secondary small" onclick="exportSynJson()">Exportar JSON</button>
-      <button class="btn secondary small" onclick="exportSynCsv()">Exportar CSV</button>
-    </div>
-  </div>
-  <div class="scroll-hint">↔ arraste para os lados para ver todas as colunas.</div>
-  <div class="scroll-wrap" style="margin-bottom:10px;">
-    <table id="synAspectsTable"><thead></thead><tbody></tbody></table>
-  </div>
-  <div class="copybox" id="synCopyBox"></div>
-  <textarea id="synCopyArea" style="position:absolute; left:-9999px;"></textarea>
-</div>
+<div id="viewDuplos" style="display:none">
 
 <!-- ===================== TRÂNSITOS DUPLOS ===================== -->
 <div class="panel">
   <h2>Trânsitos duplos</h2>
-  <div class="hint" style="margin-bottom:10px;">Calcule os mapas de A e B acima primeiro. Um trânsito duplo é quando o mesmo planeta em trânsito forma aspecto com um ponto de A <strong>e</strong> com um ponto de B ao mesmo tempo — diferente de um trânsito sobre o mapa composto, aqui o "gatilho" é o mesmo planeta tocando os dois mapas originais simultaneamente, o que costuma ser lido como um evento que ativa a relação como um todo.</div>
+  <div class="hint" style="margin-bottom:10px;">Um trânsito duplo é quando o mesmo planeta em trânsito forma aspecto com um ponto de A <strong>e</strong> com um ponto de B ao mesmo tempo — diferente de um trânsito sobre o mapa composto, aqui o "gatilho" é o mesmo planeta tocando os dois mapas originais simultaneamente, o que costuma ser lido como um evento que ativa a relação como um todo.</div>
+  <div id="dtPeopleSummary" style="margin-bottom:14px;"></div>
   <div class="mode-toggle">
     <div class="mode-btn active" id="dtModeSingleBtn" onclick="dtSetMode('single')">Momento exato</div>
     <div class="mode-btn" id="dtModeRangeBtn" onclick="dtSetMode('range')">Intervalo / ano</div>
@@ -500,7 +312,7 @@
   <div id="dtSingleFields">
     <div class="row3">
       <div><label>Data</label><input type="date" id="dtSingleDate"></div>
-      <div><label>Hora (opcional)</label><input type="time" id="dtSingleTime"><div class="hint">Padrão: 12:00</div></div>
+      <div><label>Hora</label><input type="time" id="dtSingleTime"><div class="hint">Padrão: 12:00</div></div>
       <div><label>Fuso (UTC)</label><input type="number" id="dtSingleTz" step="0.5" placeholder="ex: -3"></div>
     </div>
     <button class="btn secondary small" style="margin-top:10px;" onclick="dtFillNow()">Preencher com agora</button>
@@ -523,7 +335,7 @@
     </div>
   </div>
 
-  <button class="btn" onclick="calcDoubleTransits()">Calcular trânsitos duplos</button>
+  <button class="btn" id="dtCalcBtn" onclick="calcDoubleTransits()">Calcular trânsitos duplos</button>
   <div id="dtStatus" class="hint" style="margin-top:8px;"></div>
 </div>
 
@@ -569,36 +381,25 @@
 </div>
 
 </div>
-<!-- ===================== fim viewSinastria ===================== -->
+<!-- ===================== fim viewDuplos ===================== -->
 
-<!-- ===================== COMPOSTO ===================== -->
+<!-- ===================== TRÂNSITOS SOBRE O COMPOSTO ===================== -->
 <div id="viewComposto" style="display:none">
 
-<div class="note">
-  <strong>Mapa composto</strong> é o ponto médio circular entre cada planeta de A e o correspondente de B (Sol com Sol, Lua com Lua etc.) — um terceiro mapa, como se fosse o "nascimento" da relação em si. Calcule os mapas de <strong>Pessoa A</strong> e <strong>Pessoa B</strong> na aba Sinastria primeiro. O Ascendente e o Meio-do-Céu do composto também são pontos médios circulares dos originais; as casas são então remontadas a partir desse Asc — por isso aqui só oferecemos <strong>Signos Inteiros</strong> e <strong>Casas Iguais</strong> (Placidus exige latitude e hora sideral reais, que um mapa composto não tem). Trânsitos sobre esse mapa mostram a evolução da relação como "organismo" — fases de crescimento, crise, consolidação.
-</div>
-
 <div class="panel">
-  <h2>1. Mapa composto</h2>
-  <div class="hint" style="margin-bottom:10px;">Usa os mapas de A e B já calculados na aba Sinastria.</div>
+  <h2>Trânsitos sobre o composto</h2>
+  <div class="hint" style="margin-bottom:10px;">Trânsitos sobre o mapa composto (ponto médio circular entre A e B) mostram as fases da relação como um "organismo" próprio — crescimento, crise, consolidação — diferente dos trânsitos duplos, que olham o mesmo planeta tocando os dois mapas originais separadamente.</div>
+  <div id="coPeopleSummary" style="margin-bottom:10px;"></div>
   <div class="row">
     <div>
-      <label>Sistema de casas</label>
-      <select id="coHouseSystem">
+      <label>Sistema de casas do composto</label>
+      <select id="coHouseSystem" onchange="coRecomputeFromStorage()">
         <option value="whole">Signos Inteiros</option>
         <option value="equal">Casas Iguais</option>
       </select>
     </div>
     <div></div>
   </div>
-  <button class="btn" onclick="calcComposite()">Calcular mapa composto</button>
-  <div class="hint" id="coMsg" style="margin-top:8px;"></div>
-  <div class="divider"></div>
-  <div id="coOutput"><div class="empty">Calcule os mapas de A e B na aba Sinastria e depois clique em "Calcular mapa composto".</div></div>
-</div>
-
-<div class="panel">
-  <h2>2. Trânsitos sobre o composto</h2>
   <div class="mode-toggle">
     <div class="mode-btn active" id="coModeSingleBtn" onclick="coSetMode('single')">Momento exato</div>
     <div class="mode-btn" id="coModeRangeBtn" onclick="coSetMode('range')">Intervalo / ano</div>
@@ -607,7 +408,7 @@
   <div id="coSingleFields">
     <div class="row3">
       <div><label>Data</label><input type="date" id="coSingleDate"></div>
-      <div><label>Hora (opcional)</label><input type="time" id="coSingleTime"><div class="hint">Padrão: 12:00</div></div>
+      <div><label>Hora</label><input type="time" id="coSingleTime"><div class="hint">Padrão: 12:00</div></div>
       <div><label>Fuso (UTC)</label><input type="number" id="coSingleTz" step="0.5" placeholder="ex: -3"></div>
     </div>
     <button class="btn secondary small" style="margin-top:10px;" onclick="coFillNow()">Preencher com agora</button>
@@ -630,17 +431,17 @@
     <div class="hint" id="coRangeWarn" style="margin-top:6px;"></div>
   </div>
 
-  <button class="btn" onclick="calcCompositeTransits()">Calcular trânsitos sobre o composto</button>
+  <button class="btn" id="coCalcTransitsBtn" onclick="calcCompositeTransits()">Calcular trânsitos sobre o composto</button>
   <div id="coTransitStatus" class="hint" style="margin-top:8px;"></div>
 </div>
 
 <div class="panel" id="coResultsPanel" style="display:none;">
-  <h2>3. Posições em trânsito (sobre o composto)</h2>
+  <h2>Posições em trânsito (sobre o composto)</h2>
   <div class="scroll-wrap" style="margin-bottom:26px;">
     <table id="coPositionsTable"><thead></thead><tbody></tbody></table>
   </div>
 
-  <h2>4. Aspectos (ordenados por impacto)</h2>
+  <h2>Aspectos (ordenados por impacto)</h2>
   <div class="filters">
     <div class="f">
       <label>Planeta em trânsito</label>
@@ -780,8 +581,9 @@
         <div class="pm-footer-col">
             <h5>Serviços</h5>
             <a href="tiragem-cartas.html">Tiragem de Cartas</a>
-            <a href="efemerides.html" class="ativo">Cálculo de Efemérides</a>
+            <a href="mapas.html">Mapas Astrais</a>
             <a href="sinastria.html">Sinastria</a>
+            <a href="efemerides.html" class="ativo">Efemérides</a>
         </div>
         <div class="pm-footer-col">
             <h5>Legal</h5>
@@ -796,6 +598,6 @@
 <script src="js/theme.js"></script>
 <script src="js/nav-dropdown.js"></script>
 <script src="js/mobile-menu.js"></script>
-<script type="module" src="efemerides/js/ui/app.js"></script>
+<script type="module" src="efemerides/js/ui/app-efemerides.js"></script>
 </body>
 </html>

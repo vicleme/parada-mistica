@@ -14,7 +14,7 @@ import {
 } from '../core/constants.js';
 import { downloadBlob } from '../shared/download.js';
 import { toDateInputValue, readDateParts } from './natal.js';
-import { synChartA, synChartB, synPointList, synPointLon } from './synastry.js';
+import { synChartA, synChartB, synPointList, synPointLon, loadSynChartsFromStorageOnly } from './synastry.js';
 import {
   collectNatalAspectEvents, planetMatchesFilter, isBackground, aspectRowHtml, rowToPlainObject
 } from './transits.js';
@@ -27,6 +27,28 @@ export function circularMidpoint(lon1, lon2){
 
 export let compositeChart = null; // mesma "forma" de natalChart — reaproveita synPointList/synPointLon
 
+// ---------- cálculo puro (sem DOM), reaproveitado tanto pela aba Composto
+// (mapas.html, formulário com synChartA/B já na tela) quanto pela aba
+// "Sobre o composto" em efemerides.html (que só tem A/B via localStorage) ----------
+export function computeCompositeFromCharts(chartA, chartB, houseSystem){
+  const positions = {};
+  TRANSIT_BODIES.forEach(name=>{
+    positions[name] = circularMidpoint(chartA.positions[name], chartB.positions[name]);
+  });
+
+  let asc=null, mc=null, cusps=null, hasHouses=false, warning=null;
+  if(chartA.hasHouses && chartB.hasHouses){
+    asc = circularMidpoint(chartA.asc, chartB.asc);
+    mc = circularMidpoint(chartA.mc, chartB.mc);
+    cusps = houseSystem==='whole' ? wholeSignCusps(asc) : equalCusps(asc);
+    hasHouses = true;
+  } else {
+    warning = 'Um dos mapas (A ou B) não tem hora/local completos — o composto foi calculado sem Ascendente/Casas, só signo e grau dos planetas.';
+  }
+
+  return {compositeChart: {positions, cusps, asc, mc, hasHouses}, warning};
+}
+
 export function calcComposite(){
   const msgEl = document.getElementById('coMsg');
   msgEl.textContent=''; msgEl.style.color='';
@@ -35,25 +57,37 @@ export function calcComposite(){
     msgEl.style.color = 'var(--rose)';
     return;
   }
-  const positions = {};
-  TRANSIT_BODIES.forEach(name=>{
-    positions[name] = circularMidpoint(synChartA.positions[name], synChartB.positions[name]);
-  });
-
-  let asc=null, mc=null, cusps=null, hasHouses=false;
-  if(synChartA.hasHouses && synChartB.hasHouses){
-    asc = circularMidpoint(synChartA.asc, synChartB.asc);
-    mc = circularMidpoint(synChartA.mc, synChartB.mc);
-    const sys = document.getElementById('coHouseSystem').value;
-    cusps = sys==='whole' ? wholeSignCusps(asc) : equalCusps(asc);
-    hasHouses = true;
-  } else {
-    msgEl.textContent = 'Um dos mapas (A ou B) não tem hora/local completos — o composto foi calculado sem Ascendente/Casas, só signo e grau dos planetas.';
-    msgEl.style.color = 'var(--gold-dim)';
-  }
-
-  compositeChart = {positions, cusps, asc, mc, hasHouses};
+  const houseSystem = document.getElementById('coHouseSystem').value;
+  const result = computeCompositeFromCharts(synChartA, synChartB, houseSystem);
+  if(result.warning){ msgEl.textContent = result.warning; msgEl.style.color = 'var(--gold-dim)'; }
+  compositeChart = result.compositeChart;
   renderComposite();
+}
+
+// ---------- usado pela aba "Sobre o composto" (efemerides.html) — recalcula o
+// composto na hora a partir do A/B salvo no localStorage (evita guardar um
+// composto "congelado" que poderia ficar desatualizado se A/B mudar) ----------
+export function coInitFromStorage(){
+  const summaryEl = document.getElementById('coPeopleSummary');
+  const calcBtn = document.getElementById('coCalcTransitsBtn');
+  if(!summaryEl) return {ok:false};
+  const result = loadSynChartsFromStorageOnly();
+  if(!result.ok){
+    summaryEl.innerHTML = '<div class="hint">Calcule os mapas de Pessoa A e Pessoa B, e o mapa composto, na aba Composto de <a href="mapas.html#composto">Mapas Astrais</a> primeiro.</div>';
+    if(calcBtn) calcBtn.disabled = true;
+    compositeChart = null;
+    return {ok:false};
+  }
+  coRecomputeFromStorage();
+  summaryEl.innerHTML = '<div class="hint">Pessoa A: <strong>'+result.nomeA+'</strong> ('+result.dataA+') · Pessoa B: <strong>'+result.nomeB+'</strong> ('+result.dataB+') — <a href="mapas.html#composto">recalcular em Mapas Astrais ↗</a></div>';
+  if(calcBtn) calcBtn.disabled = false;
+  return {ok:true};
+}
+export function coRecomputeFromStorage(){
+  if(!synChartA || !synChartB) return;
+  const houseSystem = document.getElementById('coHouseSystem').value;
+  const result = computeCompositeFromCharts(synChartA, synChartB, houseSystem);
+  compositeChart = result.compositeChart;
 }
 
 export function renderComposite(){
@@ -142,7 +176,7 @@ export function coUpdateRangeWarn(){
 }
 
 export function calcCompositeTransits(){
-  if(!compositeChart){ coSetTransitStatus('Calcule o mapa composto primeiro.', true); return; }
+  if(!compositeChart){ coSetTransitStatus('Calcule o mapa composto (aba Composto de Mapas Astrais) primeiro.', true); return; }
   const isSingle = document.getElementById('coModeSingleBtn').classList.contains('active');
   coSetTransitStatus('Calculando...', false);
   setTimeout(()=>{
