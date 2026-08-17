@@ -124,6 +124,7 @@ export function reportMarkerItems(c){
   if ((c.lilithMagneticContacts||0) > 0) push(3, c.lilithMagneticContacts, `⚸ Lilith (${c.lilithMagneticContacts})`, c.lilithMagneticDetails, '');
   if ((c.sunTranspersonalContacts||0) > 0) push(3, c.sunTranspersonalContacts, `☉⚡ Sol transpessoal (${c.sunTranspersonalContacts})`, c.sunTranspersonalDetails, '');
   if ((c.fortuneContacts||0) > 0) push(3, c.fortuneContacts, `🍀 Fortuna (${c.fortuneContacts})`, c.fortuneDetails, '');
+  if ((c.espiritoContacts||0) > 0) push(3, c.espiritoContacts, `⊕ Espírito (${c.espiritoContacts})`, c.espiritoDetails, '');
   if ((c.sunMoonContacts||0) > 0) push(1, c.sunMoonContacts, `☉☾ Sol-Lua · eixo de reconhecimento (${c.sunMoonContacts})`, c.sunMoonDetails, 'Também conta para a categoria Emocional.');
   if ((c.houseConvergenceContacts||0) > 0) push(4, c.houseConvergenceContacts, `⌂ Casas · convergência (${c.houseConvergenceContacts})`, c.houseConvergenceDetails, '');
   if ((c.commitmentHouseContacts||0) > 0) push(1, c.commitmentHouseContacts, `🏠 Casas · estrutura de parceria (${c.commitmentHouseContacts})`, c.commitmentHouseDetails, '');

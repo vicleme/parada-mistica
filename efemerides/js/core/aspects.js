@@ -2,7 +2,7 @@
 // core/aspects.js
 // Tabela de aspectos maiores/menores, tetos de orbe por tipo de ponto, cálculo
 // de orbe/peso/pontuação de impacto para trânsitos, e os pontos derivados
-// (Parte da Fortuna, Asc/MC/DSC/IC) via angleLon.
+// (Parte da Fortuna, Parte do Espírito, Asc/MC/DSC/IC) via angleLon.
 // ============================================================================
 
 import { normDeg } from './time.js';
@@ -35,7 +35,7 @@ export const ASPECTS = [
 // dos dois — o elo mais frágil decide até onde o aspecto ainda "existe".
 export const ORB_TYPE_MULT = {
   Urano: 0.75, Netuno: 0.75, Plutao: 0.75,
-  Quiron: 0.35, NodoNorte: 0.35, Vertice: 0.35, Fortuna: 0.35,
+  Quiron: 0.35, NodoNorte: 0.35, Vertice: 0.35, Fortuna: 0.35, Espirito: 0.35,
   Lilith: 0.25,
 };
 export function orbTypeMultiplier(name){ return ORB_TYPE_MULT[name] ?? 1.0; }
@@ -52,15 +52,30 @@ export function fortunaLon(chart){
   const isDay = sunHouse>=7 && sunHouse<=12;
   return isDay ? normDeg(chart.asc + lua - sol) : normDeg(chart.asc + sol - lua);
 }
+// Parte do Espírito (Daimon): o complemento clássico da Fortuna — mesma tríade
+// Asc/Sol/Lua, com Sol e Lua invertidos em relação à fórmula da Fortuna. Asc + Sol − Lua
+// (mapa diurno) ou Asc + Lua − Sol (mapa noturno). Onde a Fortuna lê o corpo/circunstância
+// (trajetória vivida, "sorte"), o Espírito lê a intenção/vontade consciente por trás dela
+// (Firmicus/Valens; Lilly traz como Parte do Demônio) — por isso reaproveita a mesma seita
+// (isDay, a partir da posição do Sol) em vez de recalculá-la. Os dois pontos só coincidem
+// no caso degenerado de Sol e Lua conjuntos (Lua Nova) — a distinção "sorte do corpo" vs.
+// "sorte da alma" desaparece a cada Lua Nova, como esperado.
+export function espiritoLon(chart){
+  const sol = chart.positions.Sol, lua = chart.positions.Lua;
+  const sunHouse = houseOf(sol, chart.cusps);
+  const isDay = sunHouse>=7 && sunHouse<=12;
+  return isDay ? normDeg(chart.asc + sol - lua) : normDeg(chart.asc + lua - sol);
+}
 // Resolve a longitude de qualquer ponto do mapa, incluindo os ângulos derivados
-// (Asc/MC/DSC/IC/Fortuna) que não ficam em chart.positions — usada por natalLon e
-// synPointLon (mesma lógica, chart aqui é natalChart, synChartA/B ou compositeChart).
+// (Asc/MC/DSC/IC/Fortuna/Espirito) que não ficam em chart.positions — usada por natalLon
+// e synPointLon (mesma lógica, chart aqui é natalChart, synChartA/B ou compositeChart).
 export function angleLon(chart, name){
   if(name==='Asc') return chart.asc;
   if(name==='MC') return chart.mc;
   if(name==='DSC') return normDeg(chart.asc+180);
   if(name==='IC') return normDeg(chart.mc+180);
   if(name==='Fortuna') return fortunaLon(chart);
+  if(name==='Espirito') return espiritoLon(chart);
   if(name==='Vertice') return chart.vertex;
   return chart.positions[name];
 }

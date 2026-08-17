@@ -29,7 +29,7 @@ export const PT_TO_EN_POINT = {
   Sol:'Sun', Lua:'Moon', Mercurio:'Mercury', Venus:'Venus', Marte:'Mars',
   Jupiter:'Jupiter', Saturno:'Saturn', Urano:'Uranus', Netuno:'Neptune', Plutao:'Pluto',
   Quiron:'Chiron', NodoNorte:'Node', Lilith:'Lilith',
-  Asc:'Ascendant', MC:'MC', DSC:'DSC', IC:'IC', Fortuna:'Fortune', Vertice:'Vertex'
+  Asc:'Ascendant', MC:'MC', DSC:'DSC', IC:'IC', Fortuna:'Fortune', Espirito:'Spirit', Vertice:'Vertex'
 };
 // Mesma tabela AXIS_BOOST da Calculadora de Sinastria (index.html), tier a tier. Vértice
 // agora é calculado por este arquivo (ver vertexLon) e por isso os pares Vértice foram
@@ -113,10 +113,14 @@ export const AXIS_BOOST_SYN = new Map([
   ['Moon-Neptune',1.20],['Moon-Pluto',1.20],['Moon-Uranus',1.20],
   ['MC-Neptune',1.20],['IC-Neptune',1.20],['Ascendant-Neptune',1.20],
   // Casos deliberadamente ABAIXO do genérico (0.6) — Ascendente-Ascendente (leitura
-  // menos unânime na literatura) e Fortuna tocando pessoal (ponto derivado, não corpo
-  // real; peso baixo pra não deixar 1 contato dominar sozinho):
+  // menos unânime na literatura) e Fortuna/Espírito tocando pessoal (pontos derivados,
+  // não corpos reais; peso baixo pra não deixar 1 contato dominar sozinho). Espírito
+  // entra no mesmo tier de Fortuna — mesmo estatuto (tríade Asc/Sol/Lua), sem razão
+  // astrológica pra pesar diferente aqui:
   ['Ascendant-Ascendant',0.6],['Fortune-Sun',0.6],['Fortune-Moon',0.6],
   ['Fortune-Mercury',0.6],['Fortune-Venus',0.6],['Fortune-Mars',0.6],
+  ['Spirit-Sun',0.6],['Spirit-Moon',0.6],['Spirit-Mercury',0.6],
+  ['Spirit-Venus',0.6],['Spirit-Mars',0.6],
   // DSC-DSC (auditoria de simetria Asc/Desc, portada do index.html): mesmo peso
   // reduzido do Ascendente-Ascendente — não havia entrada aqui, então caía no
   // genérico 1.0, maior que o 0.6 do Asc-Asc sem razão astrológica pra isso.
@@ -238,7 +242,7 @@ export function impactScoreSynastry(aspect,orb,nameA,nameB){
   const divisor = ORB_DECAY_DIVISOR_SYN[aspectEn] || 2.5;
   // decaimento exponencial normal (nunca chega a zero sozinho) + teto rígido por tipo
   // de astro (effectiveMaxOrb, ver ASPECTS acima): além dele, zera de vez — Quíron/
-  // Lilith/Nodo/Vértice/Fortuna não "esmaecem", deixam de contar.
+  // Lilith/Nodo/Vértice/Fortuna/Espírito não "esmaecem", deixam de contar.
   const orbW = orb <= effectiveMaxOrb(aspect,nameA,nameB) ? Math.exp(-orb/divisor) : 0;
   const bothOuter = TRANSPERSONAL_PLANETS_SYN.has(nameA) && TRANSPERSONAL_PLANETS_SYN.has(nameB);
   const generationalDiscount = bothOuter ? 0.3 : 1.0;

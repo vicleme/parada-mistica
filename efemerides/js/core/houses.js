@@ -83,3 +83,29 @@ export function degMinStr(lonInSign){
 }
 export function signOf(lon){ return Math.floor(normDeg(lon)/30); }
 
+// Interceptação: em sistemas de casa desigual (Placidus é o único dos três
+// aqui — Signos Inteiros e Casas Iguais sempre espaçam cúspides a exatos
+// 30°, então nunca interceptam), uma casa pode cobrir mais de 30° de
+// longitude e "engolir" um signo inteiro sem que nenhuma cúspide caia
+// dentro dele — signo interceptado, preso por inteiro dentro de uma única
+// casa. Por simetria (a soma das 12 casas ainda fecha 360°), sempre que um
+// signo fica sem cúspide, outro signo acaba caindo em DUAS cúspides
+// diferentes (signo duplicado / regendo duas casas ao mesmo tempo) — não é
+// erro de cálculo, é geometria normal do sistema. Detecta os dois casos
+// varrendo o signo de cada cúspide; pra achar em qual casa um signo
+// interceptado está preso, usa o meio do signo (grau 15) via houseOf —
+// seguro porque um signo interceptado nunca tem cúspide cruzando seu meio.
+export function interceptedSigns(cusps){
+  const cuspSignIdx = cusps.map(c=>signOf(c));
+  const intercepted = [];
+  for(let s=0;s<12;s++){
+    if(!cuspSignIdx.includes(s)) intercepted.push({sign:s, house:houseOf(s*30+15, cusps)});
+  }
+  const housesBySign = {};
+  cuspSignIdx.forEach((s,i)=>{ (housesBySign[s] ||= []).push(i+1); });
+  const duplicated = Object.entries(housesBySign)
+    .filter(([,houses])=>houses.length>1)
+    .map(([sign,houses])=>({sign:Number(sign), houses}));
+  return {intercepted, duplicated};
+}
+

@@ -53,6 +53,10 @@ export function categoryPoolFor(planet1, planet2){
   if (planet1 === 'Ascendant' && planet2 === 'Ascendant') return ['afinidade'];
   if ((planet1 === 'Fortune' && CORE_PERSONAL_PLANETS.has(planet2)) ||
       (planet2 === 'Fortune' && CORE_PERSONAL_PLANETS.has(planet1))) return ['afinidade'];
+  // Parte do Espírito tocando pessoal: ajuste de paridade com a Fortuna acima — mesmo
+  // estatuto de ponto derivado, mesma família de "leveza/facilidade" em Afinidade.
+  if ((planet1 === 'Spirit' && CORE_PERSONAL_PLANETS.has(planet2)) ||
+      (planet2 === 'Spirit' && CORE_PERSONAL_PLANETS.has(planet1))) return ['afinidade'];
   if (planet1 === 'Saturn' && planet2 === 'Saturn') return ['pratico'];
   if ((planet1 === 'Node' || planet1 === 'SouthNode') && (planet2 === 'Node' || planet2 === 'SouthNode')) return ['pratico'];
   if (planet1 === 'Vertex' && planet2 === 'Vertex') return ['pratico'];

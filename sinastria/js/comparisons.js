@@ -116,7 +116,7 @@ export function markersTotal(c){
   return (c.saturnCommitmentContacts||0) + (c.nodeDestinyContacts||0) + (c.nodeAxisContacts||0)
     + (c.vertexFatedContacts||0) + (c.chironWoundContacts||0) + (c.lilithMagneticContacts||0)
     + (c.sunTranspersonalContacts||0)
-    + (c.fortuneContacts||0) + (c.isLuminarySwap?1:0);
+    + (c.fortuneContacts||0) + (c.espiritoContacts||0) + (c.isLuminarySwap?1:0);
 }
 
 // "Melhor em veredito" (antigo "Melhor em potencial") — métrica derivada, calculada em
@@ -591,6 +591,7 @@ export function recalcEntry(c){
     lilithMagneticContacts, lilithMagneticHarmonic, lilithMagneticAmbivalent, lilithMagneticTense, lilithMagneticTenseLight, lilithMagneticDetails,
     sunTranspersonalContacts, sunTranspersonalHarmonic, sunTranspersonalAmbivalent, sunTranspersonalTense, sunTranspersonalTenseLight, sunTranspersonalDetails,
     fortuneContacts, fortuneHarmonic, fortuneAmbivalent, fortuneTense, fortuneTenseLight, fortuneDetails,
+    espiritoContacts, espiritoHarmonic, espiritoAmbivalent, espiritoTense, espiritoTenseLight, espiritoDetails,
     sunMoonContacts, sunMoonHarmonic, sunMoonAmbivalent, sunMoonTense, sunMoonTenseLight, sunMoonDetails,
     houseConvergenceContacts, houseConvergenceDetails,
     commitmentHouseContacts, commitmentHouseDetails,
@@ -617,6 +618,7 @@ export function recalcEntry(c){
     lilithMagneticContacts, lilithMagneticHarmonic, lilithMagneticAmbivalent, lilithMagneticTense, lilithMagneticTenseLight, lilithMagneticDetails,
     sunTranspersonalContacts, sunTranspersonalHarmonic, sunTranspersonalAmbivalent, sunTranspersonalTense, sunTranspersonalTenseLight, sunTranspersonalDetails,
     fortuneContacts, fortuneHarmonic, fortuneAmbivalent, fortuneTense, fortuneTenseLight, fortuneDetails,
+    espiritoContacts, espiritoHarmonic, espiritoAmbivalent, espiritoTense, espiritoTenseLight, espiritoDetails,
     sunMoonContacts, sunMoonHarmonic, sunMoonAmbivalent, sunMoonTense, sunMoonTenseLight, sunMoonDetails,
     houseConvergenceContacts, houseConvergenceDetails,
     commitmentHouseContacts, commitmentHouseDetails,
@@ -677,6 +679,9 @@ export function buildMarkerChipItems(c, groupName = 'markers-main'){
   }
   if ((c.fortuneContacts || 0) > 0){
     push(3, c.fortuneContacts, `<details class="marker-chip fortune" name="${groupName}"><summary><span class="icon">🍀</span>Fortuna (${c.fortuneContacts})${markerBreakdown(c.fortuneHarmonic||0, c.fortuneAmbivalent||0, c.fortuneTense||0, c.fortuneTenseLight||0)}</summary><div class="marker-detail">${escapeHtml((c.fortuneDetails||[]).join('\n'))}</div></details>`);
+  }
+  if ((c.espiritoContacts || 0) > 0){
+    push(3, c.espiritoContacts, `<details class="marker-chip espirito" name="${groupName}"><summary><span class="icon">⊕</span>Espírito (${c.espiritoContacts})${markerBreakdown(c.espiritoHarmonic||0, c.espiritoAmbivalent||0, c.espiritoTense||0, c.espiritoTenseLight||0)}</summary><div class="marker-detail">${escapeHtml((c.espiritoDetails||[]).join('\n'))}</div></details>`);
   }
   if ((c.sunMoonContacts || 0) > 0){
     push(1, c.sunMoonContacts, `<details class="marker-chip sunmoon" name="${groupName}"><summary><span class="icon">☉☾</span>Sol-Lua · eixo de reconhecimento (${c.sunMoonContacts})${markerBreakdown(c.sunMoonHarmonic||0, c.sunMoonAmbivalent||0, c.sunMoonTense||0, c.sunMoonTenseLight||0)}</summary><div class="marker-detail">${escapeHtml((c.sunMoonDetails||[]).join('\n'))}\n\n(Também conta para a categoria Emocional.)</div></details>`);
@@ -879,6 +884,7 @@ export function comparisonsToCSV(){
     'Lilith (atração magnética) total','Lilith harmônico','Lilith ambivalente','Lilith tenso',
     'Sol transpessoal (Netuno/Urano/Plutão) total','Sol transpessoal harmônico','Sol transpessoal ambivalente','Sol transpessoal tenso',
     'Fortuna (felicidade/destino) total','Fortuna harmônico','Fortuna ambivalente','Fortuna tenso',
+    'Espírito (intenção/vontade) total','Espírito harmônico','Espírito ambivalente','Espírito tenso',
     // Marcadores de casa (Parte 5): sem harmônico/ambivalente/tenso — casa não tem orbe
     // pra graduar isso (ver computeCommitmentHouses etc.), só um total cada. Gap
     // encontrado em auditoria: já tinham chip na UI e sobreviviam ao export/import em
@@ -909,6 +915,7 @@ export function comparisonsToCSV(){
     c.lilithMagneticContacts || 0, c.lilithMagneticHarmonic || 0, c.lilithMagneticAmbivalent || 0, c.lilithMagneticTense || 0,
     c.sunTranspersonalContacts || 0, c.sunTranspersonalHarmonic || 0, c.sunTranspersonalAmbivalent || 0, c.sunTranspersonalTense || 0,
     c.fortuneContacts || 0, c.fortuneHarmonic || 0, c.fortuneAmbivalent || 0, c.fortuneTense || 0,
+    c.espiritoContacts || 0, c.espiritoHarmonic || 0, c.espiritoAmbivalent || 0, c.espiritoTense || 0,
     c.commitmentHouseContacts || 0, c.destinyHouseContacts || 0,
     c.friendshipHouseContacts || 0, c.chironPartnershipHouseContacts || 0, c.plutoPartnershipHouseContacts || 0,
     c.houseConvergenceContacts || 0,
@@ -1036,6 +1043,14 @@ export function validateImportedEntry(obj){
     fortuneTense: obj.fortuneTense || 0,
     fortuneTenseLight: obj.fortuneTenseLight || 0,
     fortuneDetails: Array.isArray(obj.fortuneDetails) ? obj.fortuneDetails : [],
+    // não existiam em exports anteriores ao ajuste de paridade Espírito/Fortuna — mesmo
+    // default seguro de "não detectado" pra entradas antigas.
+    espiritoContacts: obj.espiritoContacts || 0,
+    espiritoHarmonic: obj.espiritoHarmonic || 0,
+    espiritoAmbivalent: obj.espiritoAmbivalent || 0,
+    espiritoTense: obj.espiritoTense || 0,
+    espiritoTenseLight: obj.espiritoTenseLight || 0,
+    espiritoDetails: Array.isArray(obj.espiritoDetails) ? obj.espiritoDetails : [],
     // não existiam em exports anteriores a este marcador (Sol-Lua/casas de
     // parceria/perfil de vínculo) — defaults seguros de "não detectado"/"não calculado"
     sunMoonContacts: obj.sunMoonContacts || 0,

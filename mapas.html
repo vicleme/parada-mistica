@@ -82,6 +82,7 @@
 
 <div class="tabs">
   <div class="tab active" id="tabNatal" onclick="setView('natal')">Mapa Natal</div>
+  <div class="tab" id="tabPerfil" onclick="setView('perfil')">Perfil</div>
   <div class="tab" id="tabSinastria" onclick="setView('sinastria')">Sinastria</div>
   <div class="tab" id="tabComposto" onclick="setView('composto')">Composto</div>
   <div class="tab" id="tabPessoas" onclick="setView('pessoas')">Pessoas</div>
@@ -193,11 +194,50 @@
 </div>
 <!-- ===================== fim viewNatal ===================== -->
 
+<!-- ===================== PERFIL ===================== -->
+<div id="viewPerfil" style="display:none">
+
+<div class="note">
+  <strong>Perfil</strong> é a síntese do mapa natal em 5 categorias temáticas — Intelectual (Mercúrio + casas 3/9), Emocional (Lua + casas 4/8), Ação/Vontade (Sol e Marte + casas 1/10), Vínculo/Afeto (Vênus + casas 5/7) e Estrutura/Disciplina (Saturno + casas 6/10) — a partir dos aspectos e das casas do próprio mapa. Mesma mecânica de barras da Sinastria, aplicada a um mapa só em vez de dois.
+</div>
+
+<div class="panel">
+  <h2>Perfil</h2>
+  <label>Pessoa cadastrada</label>
+  <select id="profilePessoaSelect" style="margin-bottom:6px;"></select>
+  <div class="hint" style="margin-bottom:14px;">Troca a pessoa e recalcula na hora — sem precisar voltar pra aba Mapa Natal.</div>
+  <div id="profileOutput"><div class="empty">Calcule o mapa natal primeiro, na aba Mapa Natal.</div></div>
+</div>
+
+<div class="panel" id="profileComparePanel">
+  <h2>Comparação entre mapas</h2>
+  <div class="hint" style="margin-bottom:12px;">Não é sinastria — salva o perfil calculado acima numa lista comparável, pra ver como perfis diferentes se parecem ou diferem entre si, lado a lado. Não calcula compatibilidade nenhuma entre eles.</div>
+  <div class="row" style="align-items:flex-end; flex-wrap:wrap; gap:12px;">
+    <button class="btn secondary small" style="margin-top:0;" onclick="saveProfileForComparison()">Salvar perfil atual na comparação</button>
+    <div style="flex:1"></div>
+    <div style="min-width:220px;">
+      <label>Ordenar por</label>
+      <select id="profileCompareSortBy" onchange="renderProfileComparisons()">
+        <option value="recent">Mais recentes</option>
+        <option value="alphabetical">Ordem alfabética (A-Z)</option>
+        <option value="nitidez">Maior Nitidez</option>
+        <option value="harmonia">Maior Harmonia geral</option>
+      </select>
+    </div>
+  </div>
+  <div class="hint" id="profileCompareMsg" style="margin-top:8px;"></div>
+  <div class="hint" id="profileCompareCount" style="margin-top:4px;"></div>
+  <div id="profileCompareList" style="margin-top:6px;"></div>
+</div>
+
+</div>
+<!-- ===================== fim viewPerfil ===================== -->
+
 <!-- ===================== SINASTRIA ===================== -->
 <div id="viewSinastria" style="display:none">
 
 <div class="note">
-  <strong>Sinastria</strong> compara dois mapas natais ponto a ponto: os aspectos entre os planetas de uma pessoa e os da outra, e em que casa os planetas de uma caem no mapa da outra. É uma técnica diferente do <strong>mapa composto</strong> (ponto médio entre os dois mapas, que trata a relação como uma entidade própria, com identidade e ciclo de vida próprios) — aqui o foco é a interação entre os dois mapas tal como são.
+  <strong>Sinastria</strong> compara dois mapas natais ponto a ponto: os aspectos entre os planetas de uma pessoa e os da outra, e em que casa os planetas de uma caem no mapa da outra. É uma técnica diferente do <strong>mapa composto</strong> (ponto médio entre os dois mapas, que trata a relação como uma entidade própria, com identidade e ciclo de vida próprios) — aqui o foco é a interação entre os dois mapas tal como são. Pra um relatório mais completo (veredito, categorias temáticas, comparação entre sinastrias salvas), use a <a href="sinastria.html">Calculadora de Sinastria</a> dedicada — dá pra enviar os dados calculados aqui direto pra lá (veja "Abrir na Sinastria com estes dados" mais abaixo).
 </div>
 
 <div class="grid2">
@@ -376,6 +416,7 @@
     <span class="count" id="synResultCount"></span>
     <div class="toolbar">
       <button class="btn secondary small" onclick="copySynForAI(this)">Copiar para IA</button>
+      <button class="btn secondary small" onclick="downloadSynMd()">Baixar .md</button>
       <button class="btn secondary small" onclick="copyForSinastriaCalc(this)">Copiar p/ Calculadora de Sinastria</button>
       <button class="btn small btn-link-sinastria" onclick="openInSinastriaCalc(this)">Abrir na Sinastria com estes dados ↗</button>
       <button class="btn secondary small" onclick="exportSynJson()">Exportar JSON</button>
@@ -403,7 +444,18 @@
 
 <div class="panel">
   <h2>Mapa composto</h2>
-  <div class="hint" style="margin-bottom:10px;">Usa os mapas de A e B já calculados na aba Sinastria.</div>
+  <div class="hint" style="margin-bottom:10px;">Usa os mapas de A e B já calculados na aba Sinastria — ou escolha as pessoas direto aqui embaixo, sem precisar ir até lá.</div>
+  <div class="row">
+    <div>
+      <label>Pessoa A</label>
+      <select id="coAPessoaSelect"></select>
+    </div>
+    <div>
+      <label>Pessoa B</label>
+      <select id="coBPessoaSelect"></select>
+    </div>
+  </div>
+  <div class="hint" style="margin-bottom:10px;">Ao escolher as duas, o composto é recalculado automaticamente.</div>
   <div class="row">
     <div>
       <label>Sistema de casas</label>

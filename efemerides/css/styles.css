@@ -142,6 +142,7 @@
   .tag.applying{ border-color:var(--sage); color:var(--sage); }
   .tag.separating{ border-color:var(--rose); color:var(--rose); }
   .tag.retro{ border-color:var(--violet); color:var(--violet); }
+  .tag.stationary{ border-color:var(--rose); color:var(--rose); }
   .tag.fast{ border-color:var(--text-faint); color:var(--text-dim); }
   .tag.medium{ border-color:var(--gold-dim); color:var(--gold-dim-text); }
   .tag.slow{ border-color:var(--gold); color:var(--gold-text); }
@@ -165,6 +166,15 @@
   #copyArea{ position:absolute; left:-9999px; }
   .copybox{ background:var(--input-bg); border:1px solid var(--line); border-radius:8px; padding:14px; max-height:280px; overflow:auto; white-space:pre-wrap; font-size:12px; color:var(--text-dim); margin-top:10px; display:none; }
   .note{ background:rgba(106,95,201,0.06); border:1px solid rgba(106,95,201,0.25); border-radius:8px; padding:12px 14px; font-size:12px; color:var(--text-dim); margin-bottom:18px; }
+  /* Links dentro de texto corrido (.hint/.note) usavam a cor azul/roxa padrão
+     do navegador (link/visited) — legível no tema claro, mas quase invisível
+     no tema escuro. var(--gold-text) já é a cor de acento pensada pra texto
+     (mais clara no escuro, ver :root/[data-tema="escuro"] no topo do
+     arquivo), então funciona nos dois temas sem precisar de uma regra extra
+     só pro escuro. */
+  .hint a, .note a{ color:var(--gold-text); text-decoration:underline; text-underline-offset:2px; }
+  .hint a:visited, .note a:visited{ color:var(--gold-text); }
+  .hint a:hover, .note a:hover{ color:var(--gold); }
   .note-precisao{ padding:14px 16px 12px; }
   .note-precisao .note-titulo{ margin:0 0 8px; font-size:12.5px; font-weight:700; color:var(--gold-text); letter-spacing:0.2px; }
   .note-precisao ul{ margin:0; padding:0 0 0 18px; list-style:disc; }
@@ -173,6 +183,10 @@
   .note-precisao .note-dim{ color:var(--text-faint); }
   .note-precisao .note-rodape{ margin:10px 0 0; padding-top:9px; border-top:1px solid rgba(106,95,201,0.2); font-style:italic; color:var(--text-faint); }
   .divider{ height:1px; background:var(--line); margin:22px 0; }
+  /* Leitura estrutural (Fase 1 — Mapa Natal) */
+  .structural-block{ display:flex; flex-direction:column; gap:14px; }
+  .structural-row{ display:flex; flex-direction:column; gap:4px; }
+  .structural-row .row{ display:flex; gap:20px; flex-wrap:wrap; }
   .empty{ color:var(--text-faint); padding:30px 10px; text-align:center; font-style:italic; }
   #natalSummary td, #natalSummary th{ font-size:12.5px; }
   .badge-required{ color:var(--rose); }
@@ -191,3 +205,79 @@
       linear-gradient(90deg, rgba(11,14,26,0.35) 0%, rgba(11,14,26,0.72) 62%, rgba(11,14,26,0.88) 100%),
       url('../../assets/backgrounds/cta-efemerides.jpg');
   }
+
+  /* ---------- Aba Perfil (barras de categoria + headline) ---------- */
+  /* Mesma mecânica visual da Sinastria (ver sinastria/css/styles.css: .bars/
+     .bar-row/.bar-track/.bar-fill/.bar-note + tooltip), reproduzida aqui pra
+     efemerides/ não depender do CSS de sinastria/. */
+  .profile-verdict{
+    margin-bottom:22px; padding:22px 24px; border-radius:12px;
+    background: linear-gradient(135deg, rgba(54,68,187,0.1), rgba(125,122,209,0.08));
+    border: 1px solid rgba(54,68,187,0.35);
+  }
+  .profile-verdict .tag{ font-family:'Montserrat', sans-serif; font-size:10.5px; letter-spacing:0.2em; text-transform:uppercase; color: var(--gold-text); margin-bottom:10px; border:none; padding:0; display:block; }
+  .profile-verdict h3{ font-weight:600; font-size:17px; margin:0; line-height:1.4; }
+
+  /* Bloco "Regente do Ascendente" — significador do mapa como um todo,
+     separado das 5 barras de categoria (ver core/profile.js,
+     computeAscendantRuler). Mesma família visual do .stat, mas em formato de
+     card de largura cheia (headline + lista de marcadores), não um número
+     isolado. */
+  .ascendant-ruler-card{
+    border:1px solid var(--line); border-radius:12px; padding:16px 18px;
+    background: var(--bg-panel2); margin-bottom:22px;
+  }
+  .ar-top{ display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 10px; }
+  .ar-tag{ font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-faint); font-family:'Montserrat', sans-serif; white-space:nowrap; }
+  .ar-headline{ font-size:14px; font-weight:600; }
+  .ar-harmony{ font-weight:400; color:var(--text-dim); }
+  .ar-details{ margin:10px 0 0; padding-left:18px; font-size:12px; color:var(--text-dim); line-height:1.7; }
+  .ar-details li{ margin-bottom:2px; }
+
+  .stat-row{ display:flex; gap:16px; margin-bottom:22px; flex-wrap:wrap; }
+  .stat{ flex:1; min-width:140px; border:1px solid var(--line); border-radius:12px; padding:16px 18px; background: var(--bg-panel2); }
+  .stat .val{ font-size:28px; font-weight:700; color:var(--gold-text); }
+  .stat .lbl{ font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-faint); margin-top:2px; font-family:'Montserrat', sans-serif; }
+
+  .bars{ display:flex; flex-direction:column; gap:18px; margin-bottom:8px; }
+  .bar-row .top{ display:flex; justify-content:space-between; margin-bottom:7px; font-size:13.5px; }
+  .bar-row .cat-name{ display:flex; align-items:center; gap:8px; }
+  .val-label{ display:inline-flex; align-items:center; gap:6px; }
+  .val-label [title]{ cursor:help; border-bottom:1px dotted var(--text-faint); }
+  .val-presence{ color:var(--text-dim); }
+  .val-dot{ opacity:0.5; }
+  .val-harmony{ color:var(--text); }
+  .dot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+  .bar-track{ height:9px; background: var(--input-bg); border-radius:8px; overflow:hidden; display:flex; }
+  .bar-fill{ height:100%; transition: width 1s cubic-bezier(.2,.8,.2,1); width:0%; flex-shrink:0; }
+  .bar-note{ margin-top:5px; font-size:11px; color: var(--text-faint); }
+  .bar-hover-tooltip{
+    display:none; position:fixed; z-index:100; pointer-events:none;
+    background: var(--bg-panel2); border:1px solid var(--line); border-radius:8px;
+    padding:10px 12px; font-family:'Montserrat', sans-serif; font-size:10.5px; line-height:1.7;
+    color: var(--text-dim); white-space:pre-line; max-width:300px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+
+  /* ---------- Aba Perfil: Comparação entre mapas (lista de perfis salvos,
+     em cards) ---------- */
+  /* Mesmo padrão visual da lista de sinastrias salvas (ver sinastria/css/
+     styles.css: .compare-grid/.compare-card/.mini-bars), reproduzido aqui com
+     as variáveis de cor de efemerides/ pra não depender do CSS de sinastria/. */
+  .compare-empty{ color: var(--text-faint); font-size:13px; text-align:center; padding: 18px 0; }
+  .compare-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap:14px; margin-top:10px; }
+  .compare-card{
+    border:1px solid var(--line); border-radius:12px; padding:16px 18px;
+    background: var(--bg-panel2);
+  }
+  .compare-card.top-pick{ border-color: rgba(54,68,187,0.55); background: linear-gradient(135deg, rgba(54,68,187,0.08), rgba(125,122,209,0.05)); }
+  .compare-card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:4px; }
+  .compare-card-title{ font-weight:600; font-size:14.5px; }
+  .compare-card-badge{ font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--gold-text); font-family:'Montserrat', sans-serif; white-space:nowrap; }
+  .compare-card-stats{ font-size:11.5px; color:var(--text-dim); margin-bottom:2px; }
+  .mini-bars{ display:flex; flex-direction:column; gap:7px; margin-bottom:4px; }
+  .mini-bar-row .top{ display:flex; justify-content:space-between; font-size:10.5px; margin-bottom:3px; color: var(--text-dim); }
+  .mini-bar-row .top .cat-name{ display:flex; align-items:center; gap:6px; }
+  .mini-bar-row .top .dot{ width:6px; height:6px; }
+  .mini-bar-track{ height:5px; background: var(--input-bg); border-radius:12px; overflow:hidden; display:flex; }
+  .mini-bar-fill{ height:100%; border-radius:12px; flex-shrink:0; }

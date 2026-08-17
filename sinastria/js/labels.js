@@ -18,7 +18,7 @@ export const PLANET_LABEL_PT = {
   Uranus:'Urano', Neptune:'Netuno', Pluto:'Plutão', Chiron:'Quíron', Lilith:'Lilith',
   Node:'Nodo Norte', SouthNode:'Nodo Sul', Vertex:'Vértice', Ascendant:'Ascendente', MC:'Meio-do-Céu', DSC:'Descendente',
   IC:'Fundo do Céu',
-  Fortune:'Parte da Fortuna',
+  Fortune:'Parte da Fortuna', Spirit:'Parte do Espírito',
 };
 export const ASPECT_LABEL_PT = {
   Conjunction:'conjunção', Trine:'trígono', Square:'quadratura', Opposition:'oposição',

@@ -224,13 +224,14 @@ export function renderSynPerson(who, chart){
   });
   if(chart.hasHouses){
     const ascS=signOf(chart.asc), mcS=signOf(chart.mc);
-    const dscLon=angleLon(chart,'DSC'), icLon=angleLon(chart,'IC'), fortLon=angleLon(chart,'Fortuna');
-    const dscS=signOf(dscLon), icS=signOf(icLon), fortS=signOf(fortLon);
+    const dscLon=angleLon(chart,'DSC'), icLon=angleLon(chart,'IC'), fortLon=angleLon(chart,'Fortuna'), espLon=angleLon(chart,'Espirito');
+    const dscS=signOf(dscLon), icS=signOf(icLon), fortS=signOf(fortLon), espS=signOf(espLon);
     rows += '<tr><td><span class="glyph natal">Asc</span>Ascendente</td><td>'+SIGN_GLYPH[ascS]+' '+SIGNS[ascS]+'</td><td>'+degMinStr(chart.asc%30)+'</td><td>Casa 1</td></tr>';
     rows += '<tr><td><span class="glyph natal">MC</span>Meio do Céu</td><td>'+SIGN_GLYPH[mcS]+' '+SIGNS[mcS]+'</td><td>'+degMinStr(chart.mc%30)+'</td><td>Casa 10*</td></tr>';
     rows += '<tr><td><span class="glyph natal">Dsc</span>Descendente</td><td>'+SIGN_GLYPH[dscS]+' '+SIGNS[dscS]+'</td><td>'+degMinStr(dscLon%30)+'</td><td>Casa 7</td></tr>';
     rows += '<tr><td><span class="glyph natal">IC</span>Fundo do Céu</td><td>'+SIGN_GLYPH[icS]+' '+SIGNS[icS]+'</td><td>'+degMinStr(icLon%30)+'</td><td>Casa 4*</td></tr>';
     rows += '<tr><td><span class="glyph natal">'+PLANET_GLYPH.Fortuna+'</span>Parte da Fortuna</td><td>'+SIGN_GLYPH[fortS]+' '+SIGNS[fortS]+'</td><td>'+degMinStr(fortLon%30)+'</td><td>Casa '+houseOf(fortLon,chart.cusps)+'</td></tr>';
+    rows += '<tr><td><span class="glyph natal">'+PLANET_GLYPH.Espirito+'</span>Parte do Espírito</td><td>'+SIGN_GLYPH[espS]+' '+SIGNS[espS]+'</td><td>'+degMinStr(espLon%30)+'</td><td>Casa '+houseOf(espLon,chart.cusps)+'</td></tr>';
     const vtxLon=chart.vertex, vtxS=signOf(vtxLon);
     rows += '<tr><td><span class="glyph natal">'+PLANET_GLYPH.Vertice+'</span>Vértice</td><td>'+SIGN_GLYPH[vtxS]+' '+SIGNS[vtxS]+'</td><td>'+degMinStr(vtxLon%30)+'</td><td>Casa '+houseOf(vtxLon,chart.cusps)+'</td></tr>';
   }
@@ -412,8 +413,10 @@ export function exportSynCsv(){
   downloadBlob('\uFEFF'+lines.join('\n'), 'sinastria-resultado.csv', 'text/csv;charset=utf-8');
 }
 
-export function copySynForAI(btn){
-  if(!synData) return;
+// Monta o mesmo texto usado pelo "Copiar para IA" (posições dos dois mapas +
+// aspectos entre eles, respeitando os filtros atuais da tabela) — reaproveitado
+// tanto por copySynForAI() (clipboard) quanto por downloadSynMd() (arquivo .md).
+export function buildSynMarkdown(){
   const nameA = document.getElementById('synAName').value.trim() || 'Pessoa A';
   const nameB = document.getElementById('synBName').value.trim() || 'Pessoa B';
 
@@ -442,6 +445,12 @@ export function copySynForAI(btn){
   });
 
   text += '\nPor favor, interprete essa sinastria entre '+nameA+' e '+nameB+', considerando os aspectos acima ordenados por impacto e as casas em que os planetas de um caem no mapa do outro.';
+  return text;
+}
+
+export function copySynForAI(btn){
+  if(!synData) return;
+  const text = buildSynMarkdown();
 
   const box = document.getElementById('synCopyBox');
   box.textContent = text;
@@ -460,6 +469,16 @@ export function copySynForAI(btn){
     btn.disabled = true;
     setTimeout(()=>{ btn.textContent = original; btn.disabled = false; }, 1600);
   }
+}
+
+// "Baixar .md" da aba Sinastria — mesmo conteúdo do "Copiar para IA", como
+// arquivo (mesmo padrão de downloadNatalMd(), em features/natal.js).
+export function downloadSynMd(){
+  if(!synData) return;
+  const nameA = document.getElementById('synAName').value.trim();
+  const nameB = document.getElementById('synBName').value.trim();
+  const slug = (nameA && nameB) ? '-'+(nameA+'-'+nameB).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') : '';
+  downloadBlob(buildSynMarkdown(), 'sinastria'+slug+'.md', 'text/markdown;charset=utf-8');
 }
 
 // sufixo ordinal em inglês (1st, 2nd, 3rd, 4th... 11th, 12th) — exigido pelo formato de

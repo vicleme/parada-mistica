@@ -89,6 +89,7 @@ export function combineChemistryHarmonyPct(atracaoPct, afinidadePct){
  * @param {number} inputs.chironWoundContacts - contatos de Quíron por aspecto.
  * @param {number} inputs.chironPartnershipHouseContacts - Quíron na 7ª casa por posição (não aspecto).
  * @param {number} inputs.fortuneContacts - contatos de Fortuna (peso leve, ponto derivado).
+ * @param {number} inputs.espiritoContacts - contatos de Parte do Espírito (peso leve, ponto derivado — paridade com Fortuna).
  * @param {number} inputs.friendshipHouseContacts - sobreposições de Júpiter na 11ª casa.
  * @returns {?{label: string, description: string, structureHarmonyPct: number|null, chemistryHarmonyPct: number|null, destinyNote: string, signals: string[]}}
  *   null quando não há dado suficiente (sem estrutura, sem química E sem nenhum sinal narrativo).
@@ -105,6 +106,7 @@ export function computeVinculoProfile(inputs){
     chironWoundContacts,
     chironPartnershipHouseContacts,
     fortuneContacts,
+    espiritoContacts,
     friendshipHouseContacts,
   } = inputs;
 
@@ -122,6 +124,7 @@ export function computeVinculoProfile(inputs){
   if (chironWoundContacts > 0) signals.push(`⚷ ${chironWoundContacts} contato(s) de Quíron por aspecto — tema de ferida/cura, mais terapêutico que estrutural`);
   if (chironPartnershipHouseContacts > 0) signals.push(`⚷ Quíron na 7ª casa (posição, não aspecto) — a ferida/cura se instala fisicamente no território da parceria`);
   if (fortuneContacts > 0) signals.push(`🍀 ${fortuneContacts} contato(s) de Fortuna — indício auxiliar de felicidade/destino compartilhado (peso leve, ponto derivado)`);
+  if (espiritoContacts > 0) signals.push(`⊕ ${espiritoContacts} contato(s) de Parte do Espírito — indício auxiliar de intenção/vontade consciente compartilhada (peso leve, ponto derivado)`);
   // Júpiter na 11ª (computeFriendshipHouses): gap encontrado em auditoria — o marcador já
   // tinha chip próprio na UI, mas nunca chegava até aqui, apesar de computeVinculoProfile
   // rodar também pra relType 'amizade' (não é filtrado só pra romântico). Sem essa linha,
@@ -298,6 +301,13 @@ export function computeScores(parsed, relType){
   // minerva. Também entra (com peso baixo, ver AXIS_BOOST) na categoria Afinidade, via
   // categoryPoolFor.
   const fortune = makeMarkerTracker();
+  // Parte do Espírito com um pessoal do parceiro: ajuste de paridade com a Fortuna acima
+  // — mesmo estatuto (tríade Asc/Sol/Lua, ponto derivado, sem massa própria), mesmo
+  // tratamento (contato harmônico/tenso pra exibição, sinal narrativo auxiliar no
+  // vinculoProfile, peso baixo em Afinidade via AXIS_BOOST). Antes deste ajuste, o
+  // Espírito chegava aos aspectos (via a ponte com Mapas Astrais) mas não tinha nenhum
+  // tratamento dedicado aqui — ficava como aspecto genérico não-curado.
+  const espirito = makeMarkerTracker();
   // Sol-Lua cruzado entre os dois mapas (Sol de A com Lua de B, e vice-versa) e Sol-Sol/
   // Lua-Lua: O marcador mais clássico de "vínculo duradouro/reconhecimento mútuo" que
   // existe em sinastria — a literatura trata especificamente o Sol de um tocando a Lua
@@ -403,6 +413,10 @@ export function computeScores(parsed, relType){
       if ((a.planet1 === 'Fortune' && CORE_PERSONAL_PLANETS.has(a.planet2)) ||
           (a.planet2 === 'Fortune' && CORE_PERSONAL_PLANETS.has(a.planet1))){
         trackMarker(fortune, markerCat, a);
+      }
+      if ((a.planet1 === 'Spirit' && CORE_PERSONAL_PLANETS.has(a.planet2)) ||
+          (a.planet2 === 'Spirit' && CORE_PERSONAL_PLANETS.has(a.planet1))){
+        trackMarker(espirito, markerCat, a);
       }
       const bothLuminaries = (a.planet1 === 'Sun' || a.planet1 === 'Moon') && (a.planet2 === 'Sun' || a.planet2 === 'Moon');
       if (bothLuminaries){
@@ -846,6 +860,7 @@ export function computeScores(parsed, relType){
     chironWoundContacts: chironWound.contacts,
     chironPartnershipHouseContacts,
     fortuneContacts: fortune.contacts,
+    espiritoContacts: espirito.contacts,
     friendshipHouseContacts,
   });
 
@@ -881,6 +896,7 @@ export function computeScores(parsed, relType){
     lilithMagneticContacts: lilithMagnetic.contacts, lilithMagneticHarmonic: lilithMagnetic.harmonic, lilithMagneticAmbivalent: lilithMagnetic.ambivalent, lilithMagneticTense: lilithMagnetic.tense, lilithMagneticTenseLight: lilithMagnetic.tenseLight, lilithMagneticDetails: lilithMagnetic.details,
     sunTranspersonalContacts: sunTranspersonal.contacts, sunTranspersonalHarmonic: sunTranspersonal.harmonic, sunTranspersonalAmbivalent: sunTranspersonal.ambivalent, sunTranspersonalTense: sunTranspersonal.tense, sunTranspersonalTenseLight: sunTranspersonal.tenseLight, sunTranspersonalDetails: sunTranspersonal.details,
     fortuneContacts: fortune.contacts, fortuneHarmonic: fortune.harmonic, fortuneAmbivalent: fortune.ambivalent, fortuneTense: fortune.tense, fortuneTenseLight: fortune.tenseLight, fortuneDetails: fortune.details,
+    espiritoContacts: espirito.contacts, espiritoHarmonic: espirito.harmonic, espiritoAmbivalent: espirito.ambivalent, espiritoTense: espirito.tense, espiritoTenseLight: espirito.tenseLight, espiritoDetails: espirito.details,
     sunMoonContacts: sunMoon.contacts, sunMoonHarmonic: sunMoon.harmonic, sunMoonAmbivalent: sunMoon.ambivalent, sunMoonTense: sunMoon.tense, sunMoonTenseLight: sunMoon.tenseLight, sunMoonDetails: sunMoon.details,
     houseConvergenceContacts, houseConvergenceDetails,
     commitmentHouseContacts, commitmentHouseDetails,

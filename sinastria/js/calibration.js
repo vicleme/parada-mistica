@@ -623,6 +623,16 @@ export const AXIS_BOOST = new Map([
   ['Fortune-Mercury', 0.6],
   ['Fortune-Venus', 0.6],
   ['Fortune-Mars', 0.6],
+  // Parte do Espírito tocando pessoal: mesmo estatuto da Fortuna (tríade Asc/Sol/Lua,
+  // ponto derivado, não corpo real) — mesmo tier 0.6, sem razão astrológica pra pesar
+  // diferente daqui (mesmo critério já usado em core/synastry-weights.js, ver comentário
+  // lá em AXIS_BOOST_SYN sobre Fortune/Spirit). Ajuste de paridade: antes caía no
+  // genérico 1.0 (peso cheio), inconsistente com o cuidado que a Fortuna já tinha.
+  ['Spirit-Sun', 0.6],
+  ['Spirit-Moon', 0.6],
+  ['Spirit-Mercury', 0.6],
+  ['Spirit-Venus', 0.6],
+  ['Spirit-Mars', 0.6],
 
   // Sol tocado por um transpessoal (Netuno/Urano/Plutão): mesmo tier 3 de Quíron/
   // Lilith-Sol logo acima — sinal forte de identidade sendo intensificada/desestabilizada
@@ -691,7 +701,10 @@ export const ORB_BASE_MAX = {
 // do aspecto têm multiplicadores diferentes, vale o MENOR dos dois (elo mais frágil).
 export const ORB_TYPE_MULT = {
   Uranus: 0.75, Neptune: 0.75, Pluto: 0.75,
-  Chiron: 0.35, Node: 0.35, SouthNode: 0.35, Vertex: 0.35, Fortune: 0.35,
+  // Spirit (Parte do Espírito) ajustado pra paridade com Fortune: mesmo estatuto de
+  // ponto derivado (tríade Asc/Sol/Lua, sem massa própria) — antes ficava de fora
+  // daqui e caía no teto genérico 1.0 (3x mais largo que o pretendido).
+  Chiron: 0.35, Node: 0.35, SouthNode: 0.35, Vertex: 0.35, Fortune: 0.35, Spirit: 0.35,
   Lilith: 0.25,
 };
 // Correção de auditoria: até aqui, a ÚNICA coisa que diferenciava aspecto maior de menor

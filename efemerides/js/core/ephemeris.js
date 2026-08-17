@@ -68,6 +68,61 @@ export function moonLongitude(T){
    -0.002602*Math.sin(2*D-Mp+2*F)+0.002390*Math.sin(2*D-M-Mp);
   return normDeg(Lp+s);
 }
+// ---------------------------------------------------------------------------
+// Sizígia Pré-Natal (SAN) — a Lua Nova ou Cheia mais recente antes do
+// nascimento, um dos 5 "lugares da vida" usados no Almuten Figuris (ver
+// computeAlmutenFiguris em dignities.js). Não existe fórmula fechada pra
+// isso: busca-se retroativamente no tempo o instante exato em que a
+// elongação Lua-Sol cruza 0° (conjunção/Lua Nova) ou 180° (oposição/Lua
+// Cheia), partindo do nascimento.
+//
+// Método: acompanha a elongação de forma "desembrulhada" (soma/subtrai 360°
+// a cada passo pra não perder a continuidade ao cruzar 0°/360°) enquanto
+// recua em passos de 1 dia, até passar do alvo (0° ou 180°, o que estiver
+// mais próximo abaixo da elongação de nascimento); depois refina por
+// bisseção. Precisão final bem abaixo de 1 minuto de tempo, suficiente pra
+// qualquer diferença de grau na dignidade essencial.
+// ---------------------------------------------------------------------------
+const DAY_T = 1/36525; // 1 dia em séculos julianos
+function elongationAt(T){
+  const pos = computeDayPositions(T);
+  return {raw: normDeg(pos.Lua - pos.Sol), pos};
+}
+export function computePrenatalSyzygy(Tbirth){
+  if(Tbirth==null) return null;
+  const birth = elongationAt(Tbirth);
+  const refE = birth.raw; // [0,360)
+  const target = Math.floor(refE/180)*180; // 0 (Lua Nova) ou 180 (Lua Cheia) — o mais próximo abaixo
+  function unwrapped(T){
+    let e = normDeg(computeDayPositions(T).Lua - computeDayPositions(T).Sol);
+    while(e - refE > 180) e -= 360;
+    while(e - refE < -180) e += 360;
+    return e;
+  }
+  let Tprev = Tbirth, Eprev = refE;
+  let Tcur = Tbirth, Ecur = refE;
+  let iterations = 0;
+  while(Ecur > target && iterations < 60){
+    Tprev = Tcur; Eprev = Ecur;
+    Tcur = Tcur - DAY_T;
+    Ecur = unwrapped(Tcur);
+    iterations++;
+  }
+  // Bisseção entre Tcur (E<=target) e Tprev (E>=target)
+  let a = Tcur, b = Tprev;
+  for(let i=0;i<40;i++){
+    const mid = (a+b)/2;
+    const Emid = unwrapped(mid);
+    if(Emid > target) b = mid; else a = mid;
+  }
+  const Tsyzygy = (a+b)/2;
+  const pos = computeDayPositions(Tsyzygy);
+  const isNewMoon = target % 360 === 0;
+  // Lua Nova: Sol e Lua no mesmo grau (uso o do Sol); Lua Cheia: uso o grau
+  // da Lua — convenção clássica (Valens/Hefestião) pra "grau da sizígia".
+  const lon = isNewMoon ? pos.Sol : pos.Lua;
+  return {lon, isNewMoon, T: Tsyzygy};
+}
 export function computeDayPositions(T){
   const earth=heliocentric(ELEMENTS.Terra,T);
   const out={};

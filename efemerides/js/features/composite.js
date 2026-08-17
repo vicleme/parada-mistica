@@ -8,7 +8,7 @@
 import { normDeg, toJD, dateToJD_UT } from '../core/time.js';
 import { computeDayPositions } from '../core/ephemeris.js';
 import { wholeSignCusps, equalCusps, houseOf, degMinStr, signOf } from '../core/houses.js';
-import { ASPECTS, angleLon, orbFromAspect, impactScore } from '../core/aspects.js';
+import { ASPECTS, angleLon, orbFromAspect, impactScore, effectiveMaxOrb } from '../core/aspects.js';
 import {
   TRANSIT_BODIES, PLANET_GLYPH, PLANET_LABEL, SIGN_GLYPH, SIGNS, PLANET_GROUPS, speedTag
 } from '../core/constants.js';
@@ -102,17 +102,192 @@ export function renderComposite(){
   });
   if(compositeChart.hasHouses){
     const ascS=signOf(compositeChart.asc), mcS=signOf(compositeChart.mc);
-    const dscLon=angleLon(compositeChart,'DSC'), icLon=angleLon(compositeChart,'IC'), fortLon=angleLon(compositeChart,'Fortuna');
-    const dscS=signOf(dscLon), icS=signOf(icLon), fortS=signOf(fortLon);
+    const dscLon=angleLon(compositeChart,'DSC'), icLon=angleLon(compositeChart,'IC'), fortLon=angleLon(compositeChart,'Fortuna'), espLon=angleLon(compositeChart,'Espirito');
+    const dscS=signOf(dscLon), icS=signOf(icLon), fortS=signOf(fortLon), espS=signOf(espLon);
     rows += '<tr><td><span class="glyph natal">Asc</span>Ascendente</td><td>'+SIGN_GLYPH[ascS]+' '+SIGNS[ascS]+'</td><td>'+degMinStr(compositeChart.asc%30)+'</td><td>Casa 1</td></tr>';
     rows += '<tr><td><span class="glyph natal">MC</span>Meio do Céu</td><td>'+SIGN_GLYPH[mcS]+' '+SIGNS[mcS]+'</td><td>'+degMinStr(compositeChart.mc%30)+'</td><td>Casa 10*</td></tr>';
     rows += '<tr><td><span class="glyph natal">Dsc</span>Descendente</td><td>'+SIGN_GLYPH[dscS]+' '+SIGNS[dscS]+'</td><td>'+degMinStr(dscLon%30)+'</td><td>Casa 7</td></tr>';
     rows += '<tr><td><span class="glyph natal">IC</span>Fundo do Céu</td><td>'+SIGN_GLYPH[icS]+' '+SIGNS[icS]+'</td><td>'+degMinStr(icLon%30)+'</td><td>Casa 4*</td></tr>';
     rows += '<tr><td><span class="glyph natal">'+PLANET_GLYPH.Fortuna+'</span>Parte da Fortuna</td><td>'+SIGN_GLYPH[fortS]+' '+SIGNS[fortS]+'</td><td>'+degMinStr(fortLon%30)+'</td><td>Casa '+houseOf(fortLon,compositeChart.cusps)+'</td></tr>';
+    rows += '<tr><td><span class="glyph natal">'+PLANET_GLYPH.Espirito+'</span>Parte do Espírito</td><td>'+SIGN_GLYPH[espS]+' '+SIGNS[espS]+'</td><td>'+degMinStr(espLon%30)+'</td><td>Casa '+houseOf(espLon,compositeChart.cusps)+'</td></tr>';
   }
   let warn = compositeChart.hasHouses ? '' : '<div class="hint" style="margin-bottom:10px;"><span class="badge-required">Sem Casas:</span> um dos dois mapas não tinha hora/local completos.</div>';
   el.innerHTML = warn + '<table><thead><tr><th>Ponto</th><th>Signo</th><th>Grau</th><th>Casa</th></tr></thead><tbody>'+rows+'</tbody></table>'
-    + (compositeChart.hasHouses ? '<div class="hint" style="margin-top:8px;">*MC nem sempre cai exatamente na cúspide da Casa 10 em Signos Inteiros — isso é esperado.</div>' : '');
+    + (compositeChart.hasHouses ? '<div class="hint" style="margin-top:8px;">*MC nem sempre cai exatamente na cúspide da Casa 10 em Signos Inteiros — isso é esperado.</div>' : '')
+    + renderCompositeDetailTables(compositeChart)
+    + renderCompositeFooterActions();
+}
+
+// ---------- Casas e Aspectos do composto (tabela de detalhe, colapsada por
+// padrão atrás de um interruptor — mesmo padrão de features/natal.js,
+// renderDetailTables/toggleNatalDetailTables, só que sem a tabela de
+// Velocidades: o composto é um ponto médio, não tem "movimento" próprio) ----------
+const CO_DETAIL_CORE_PLANETS = ["Sol","Lua","Mercurio","Venus","Marte","Jupiter","Saturno","Urano","Netuno","Plutao"];
+const CO_DETAIL_OTHER_BASE = ["Quiron","NodoNorte","Lilith"];
+const CO_DETAIL_OTHER_HOUSES = ["Asc","MC","DSC","IC","Fortuna","Espirito","Vertice"];
+
+function coFindAspectBetween(lon1, lon2, nameA, nameB){
+  let best = null;
+  for(const asp of ASPECTS){
+    const orb = orbFromAspect(lon1, lon2, asp.angle);
+    const maxOrb = effectiveMaxOrb(asp, nameA, nameB);
+    if(orb <= maxOrb && (!best || orb < best.orb)){
+      best = {aspect: asp.name, glyph: asp.glyph, orb};
+    }
+  }
+  return best;
+}
+
+function computeCompositeDetailAspects(chart){
+  const other = CO_DETAIL_OTHER_BASE.concat(chart.hasHouses ? CO_DETAIL_OTHER_HOUSES : []);
+  const all = CO_DETAIL_CORE_PLANETS.concat(other);
+  const planetary = [], others = [];
+  for(let i=0;i<all.length;i++){
+    for(let j=i+1;j<all.length;j++){
+      const nameA=all[i], nameB=all[j];
+      const lon1=angleLon(chart,nameA), lon2=angleLon(chart,nameB);
+      const found = coFindAspectBetween(lon1,lon2,nameA,nameB);
+      if(!found) continue;
+      const bothCore = CO_DETAIL_CORE_PLANETS.includes(nameA) && CO_DETAIL_CORE_PLANETS.includes(nameB);
+      (bothCore?planetary:others).push({nameA,nameB,...found});
+    }
+  }
+  planetary.sort((a,b)=>a.orb-b.orb);
+  others.sort((a,b)=>a.orb-b.orb);
+  return {planetary, others};
+}
+
+function coHousesTableHtml(chart){
+  if(!chart.hasHouses) return '<div class="hint">Sem hora/local completos — Casas não calculadas.</div>';
+  const rows = chart.cusps.map((c,i)=>{
+    const sIdx = signOf(c);
+    return '<tr><td>Casa '+(i+1)+'</td><td>'+SIGN_GLYPH[sIdx]+' '+SIGNS[sIdx]+'</td><td>'+degMinStr(c%30)+'</td></tr>';
+  }).join('');
+  return '<table><thead><tr><th>Casa</th><th>Signo</th><th>Grau</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+function coAspectRowsTableHtml(rows){
+  if(!rows.length) return '<div class="hint">Nenhum aspecto dentro do orbe considerado.</div>';
+  const body = rows.map(r=>'<tr><td>'+PLANET_GLYPH[r.nameA]+' '+PLANET_LABEL[r.nameA]+'</td><td>'+r.glyph+' '+r.aspect+'</td><td>'+PLANET_GLYPH[r.nameB]+' '+PLANET_LABEL[r.nameB]+'</td><td>'+r.orb.toFixed(2)+'°</td></tr>').join('');
+  return '<table><thead><tr><th>Ponto A</th><th>Aspecto</th><th>Ponto B</th><th>Orbe</th></tr></thead><tbody>'+body+'</tbody></table>';
+}
+
+function renderCompositeDetailTables(chart){
+  const {planetary, others} = computeCompositeDetailAspects(chart);
+  return `
+  <div class="divider"></div>
+  <button class="btn secondary small" id="coDetailToggleBtn" onclick="toggleCompositeDetailTables()">▸ Casas e Aspectos</button>
+  <div id="coDetailBox" style="display:none; margin-top:12px;">
+    <h3 style="margin-top:0; margin-bottom:10px;">Casas</h3>
+    ${coHousesTableHtml(chart)}
+    <h3 style="margin-top:26px; margin-bottom:10px;">Aspectos planetários</h3>
+    ${coAspectRowsTableHtml(planetary)}
+    <h3 style="margin-top:26px; margin-bottom:10px;">Outros aspectos <span class="hint">(Quíron, Nodo, Lilith${chart.hasHouses?', ângulos, Parte da Fortuna, Parte do Espírito e Vértice':''})</span></h3>
+    ${coAspectRowsTableHtml(others)}
+  </div>`;
+}
+
+export function toggleCompositeDetailTables(){
+  const box = document.getElementById('coDetailBox');
+  const btn = document.getElementById('coDetailToggleBtn');
+  if(!box || !btn) return;
+  const hidden = box.style.display==='none' || !box.style.display;
+  box.style.display = hidden ? 'block' : 'none';
+  btn.textContent = (hidden?'▾':'▸') + ' Casas e Aspectos';
+}
+
+// ---------- versões em Markdown das mesmas tabelas acima, usadas em
+// buildCompositeChartMarkdown() ----------
+function coHousesTableMd(chart){
+  if(!chart.hasHouses) return '_Sem hora/local completos — Casas não calculadas._\n';
+  let md = '| Casa | Signo | Grau |\n|---|---|---|\n';
+  chart.cusps.forEach((c,i)=>{ md += `| Casa ${i+1} | ${SIGNS[signOf(c)]} | ${degMinStr(c%30)} |\n`; });
+  return md;
+}
+
+function coAspectRowsTableMd(rows){
+  if(!rows.length) return '_Nenhum aspecto dentro do orbe considerado._\n';
+  let md = '| Ponto A | Aspecto | Ponto B | Orbe |\n|---|---|---|---|\n';
+  rows.forEach(r=>{ md += `| ${PLANET_LABEL[r.nameA]} | ${r.aspect} | ${PLANET_LABEL[r.nameB]} | ${r.orb.toFixed(2)}° |\n`; });
+  return md;
+}
+
+// ---------- Exportação em Markdown do mapa composto em si (botões "Copiar
+// para IA" / "Baixar .md" logo abaixo da tabela de posições+Casas+Aspectos —
+// não confundir com copyCompositeForAI(), que exporta os TRÂNSITOS sobre o
+// composto na aba "Sobre o composto" de efemerides.html) ----------
+export function buildCompositeChartMarkdown(chart){
+  const nameA = (document.getElementById('synAName')?.value || '').trim() || 'Pessoa A';
+  const nameB = (document.getElementById('synBName')?.value || '').trim() || 'Pessoa B';
+
+  let md = `# Mapa Composto — ${nameA} + ${nameB}\n\n`;
+  if(chart.hasHouses){
+    const houseSystem = document.getElementById('coHouseSystem')?.value;
+    const sysLabel = {whole:'Signos Inteiros', equal:'Casas Iguais'};
+    md += 'Sistema de casas: '+(sysLabel[houseSystem]||houseSystem||'—')+'\n\n';
+  }
+
+  md += '## Posições\n\n| Ponto | Signo | Grau | Casa |\n|---|---|---|---|\n';
+  TRANSIT_BODIES.forEach(name=>{
+    const lon = chart.positions[name];
+    const house = chart.hasHouses ? houseOf(lon,chart.cusps) : null;
+    md += `| ${PLANET_LABEL[name]} | ${SIGNS[signOf(lon)]} | ${degMinStr(lon%30)} | ${house?('Casa '+house):'—'} |\n`;
+  });
+  if(chart.hasHouses){
+    const dscLon=angleLon(chart,'DSC'), icLon=angleLon(chart,'IC'), fortLon=angleLon(chart,'Fortuna'), espLon=angleLon(chart,'Espirito');
+    md += `| Ascendente | ${SIGNS[signOf(chart.asc)]} | ${degMinStr(chart.asc%30)} | Casa 1 |\n`;
+    md += `| Meio do Céu | ${SIGNS[signOf(chart.mc)]} | ${degMinStr(chart.mc%30)} | Casa 10* |\n`;
+    md += `| Descendente | ${SIGNS[signOf(dscLon)]} | ${degMinStr(dscLon%30)} | Casa 7 |\n`;
+    md += `| Fundo do Céu | ${SIGNS[signOf(icLon)]} | ${degMinStr(icLon%30)} | Casa 4* |\n`;
+    md += `| Parte da Fortuna | ${SIGNS[signOf(fortLon)]} | ${degMinStr(fortLon%30)} | Casa ${houseOf(fortLon,chart.cusps)} |\n`;
+    md += `| Parte do Espírito | ${SIGNS[signOf(espLon)]} | ${degMinStr(espLon%30)} | Casa ${houseOf(espLon,chart.cusps)} |\n`;
+    md += '\n*MC nem sempre cai exatamente na cúspide da Casa 10 no sistema de Signos Inteiros.*\n';
+  } else {
+    md += '\n*Um dos dois mapas não tinha hora/local completos — Ascendente e Casas não calculados.*\n';
+  }
+  md += '\n';
+
+  md += '## Casas e Aspectos\n\n';
+  md += '### Casas\n\n' + coHousesTableMd(chart) + '\n';
+  const detailAsp = computeCompositeDetailAspects(chart);
+  md += '### Aspectos planetários\n\n' + coAspectRowsTableMd(detailAsp.planetary) + '\n';
+  md += '### Outros aspectos\n\n' + coAspectRowsTableMd(detailAsp.others) + '\n';
+
+  md += '---\n_Gerado pelo Parada Mística — mapa composto (ponto médio circular entre os dois mapas natais)._\n';
+  return md;
+}
+
+export function copyCompositeChartForAI(btn){
+  if(!compositeChart) return;
+  const text = buildCompositeChartMarkdown(compositeChart);
+  const ta = document.getElementById('coChartCopyArea');
+  if(ta){ ta.value = text; ta.select(); }
+  try{ navigator.clipboard.writeText(text); }
+  catch(e){ if(ta) document.execCommand('copy'); }
+  if(btn){
+    const original = btn.textContent;
+    btn.textContent = 'Copiado ✓';
+    btn.disabled = true;
+    setTimeout(()=>{ btn.textContent = original; btn.disabled = false; }, 1600);
+  }
+}
+
+export function downloadCompositeChartMd(){
+  if(!compositeChart) return;
+  const nameA = (document.getElementById('synAName')?.value || '').trim();
+  const nameB = (document.getElementById('synBName')?.value || '').trim();
+  const slug = (nameA && nameB) ? '-'+(nameA+'-'+nameB).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') : '';
+  downloadBlob(buildCompositeChartMarkdown(compositeChart), 'mapa-composto'+slug+'.md', 'text/markdown;charset=utf-8');
+}
+
+function renderCompositeFooterActions(){
+  return `
+  <div class="divider"></div>
+  <div class="structural-row" style="flex-direction:row; gap:10px; flex-wrap:wrap;">
+    <button class="btn secondary small" onclick="copyCompositeChartForAI(this)">Copiar para IA</button>
+    <button class="btn secondary small" onclick="downloadCompositeChartMd()">Baixar .md</button>
+  </div>
+  <textarea id="coChartCopyArea" style="position:absolute; left:-9999px;"></textarea>`;
 }
 
 // ---------- trânsitos sobre o composto (reaproveita o mesmo motor de cálculo) ----------
