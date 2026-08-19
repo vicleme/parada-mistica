@@ -8,7 +8,7 @@
 // ============================================================================
 
 import {
-  calcNatal, clearNatalStorage, exportNatalInput, fillNow, fillPreset,
+  applyNatalInput, calcNatal, clearNatalStorage, collectNatalInput, exportNatalInput, fillNow, fillPreset,
   importNatalInput, pickCity, searchCity, setMode, toggleImportBox, updateRangeWarn,
   loadNatalFromStorage,
 } from '../features/natal.js';
@@ -27,6 +27,34 @@ import {
   coUpdateRangeWarn, copyCompositeForAI, exportCompositeCsv, exportCompositeJson,
   renderCompositeAspectsTable, coInitFromStorage, coRecomputeFromStorage,
 } from '../features/composite.js';
+
+import { savePessoa } from '../../../assets/js/pessoas.js';
+import { attachPessoaSelect, injectStyles as injectPessoaPickerStyles } from '../../../assets/js/pessoa-picker.js';
+
+// ---------- cadastro de pessoas: seletor da aba Trânsitos individuais ----------
+// Só preenche o formulário de Mapa natal (referência) — a pessoa ainda clica
+// em "Calcular mapa natal" como sempre. "+ Nova pessoa" abre o mesmo modal
+// usado em mapas.html, pré-preenchido com o que já estiver digitado aqui.
+const natalPessoaSelectEl = document.getElementById('natalPessoaSelect');
+if (natalPessoaSelectEl) {
+  natalPessoaSelectEl._pmOnSelect = (pessoa) => { if (pessoa) applyNatalInput(pessoa); };
+  natalPessoaSelectEl._pmGetPrefill = () => collectNatalInput();
+  attachPessoaSelect(natalPessoaSelectEl, { onSelect: natalPessoaSelectEl._pmOnSelect, getPrefill: natalPessoaSelectEl._pmGetPrefill });
+}
+
+// ---------- salvar os dados atuais do Mapa natal (referência) como pessoa cadastrada ----------
+function salvarNatalNoCadastro() {
+  const msgEl = document.getElementById('natalPessoaMsg');
+  const data = collectNatalInput();
+  if (!data.nome) { msgEl.textContent = 'Preencha o campo Nome antes de salvar no cadastro.'; msgEl.style.color = 'var(--rose)'; return; }
+  if (!data.data_nascimento) { msgEl.textContent = 'Preencha ao menos a data de nascimento.'; msgEl.style.color = 'var(--rose)'; return; }
+  const selectedId = natalPessoaSelectEl.value && natalPessoaSelectEl.value !== '__nova__' ? natalPessoaSelectEl.value : undefined;
+  const pessoa = savePessoa({ id: selectedId, ...data });
+  attachPessoaSelect(natalPessoaSelectEl, { onSelect: natalPessoaSelectEl._pmOnSelect, getPrefill: natalPessoaSelectEl._pmGetPrefill });
+  natalPessoaSelectEl.value = pessoa.id;
+  msgEl.style.color = '';
+  msgEl.textContent = (selectedId ? 'Cadastro de "' : 'Nova pessoa "') + pessoa.nome + '" salvo. Já disponível nas outras ferramentas do site.';
+}
 
 // ---------- troca de aba (Trânsitos individuais / Trânsitos duplos / Sobre o composto) ----------
 export function setView(v) {
@@ -49,6 +77,7 @@ Object.assign(window, {
   // natal (referência para trânsitos individuais)
   calcNatal, clearNatalStorage, exportNatalInput, fillNow, fillPreset,
   importNatalInput, pickCity, searchCity, setMode, toggleImportBox, updateRangeWarn,
+  salvarNatalNoCadastro,
   // trânsitos individuais
   calcTransits, copyForAI, exportResultsCsv, exportResultsJson, renderAspectsTable,
   // trânsitos duplos
@@ -65,6 +94,7 @@ Object.assign(window, {
 // ---------- inicialização: recarrega o mapa natal (referência) salvo
 // localmente, e abre a aba indicada na URL (ex: efemerides.html#duplos) ----------
 (function init() {
+  injectPessoaPickerStyles();
   if (loadNatalFromStorage()) {
     calcNatal();
   }
